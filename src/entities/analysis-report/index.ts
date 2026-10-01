@@ -15,6 +15,7 @@ export type {
   SecurityIssue,
   SecuritySeverity,
   ThirdPartyScript,
+  KnownVulnerability,
   TlsSummary,
 } from "./model/types";
 export {
@@ -33,6 +34,12 @@ export {
   type ContentAnalysis,
   type ContentInput,
 } from "./lib/analyzeContent";
+export {
+  advisorySeverity,
+  dependencyIssues,
+  dependencyQueries,
+  type DependencyQuery,
+} from "./lib/dependencies";
 export { auditDocument, type AuditInput } from "./lib/auditDocument";
 export {
   architectureNodes,

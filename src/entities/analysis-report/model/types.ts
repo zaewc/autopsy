@@ -47,6 +47,19 @@ export interface ThirdPartyScript {
   /** Script tags that carry an integrity hash. */
   withIntegrity: number;
 }
+/** An advisory matching a library version observed on the page. */
+export interface KnownVulnerability {
+  technology: string;
+  packageName: string;
+  version: string;
+  id: string;
+  aliases: readonly string[];
+  summary: string | null;
+  severity: SecuritySeverity;
+  /** Lowest fixed version, when the advisory lists one. */
+  fixed: string | null;
+  url: string;
+}
 export interface SecurityHeader {
   name: string;
   /** Null when the response does not send it. */
