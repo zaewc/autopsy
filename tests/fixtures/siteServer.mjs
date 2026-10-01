@@ -41,6 +41,8 @@ createServer((request, response) => {
     request.on("close", () => clearTimeout(timer));
     return;
   }
+  if (path === "/moved")
+    return response.writeHead(301, { location: "/next" }).end();
   const route = ROUTES[path];
   if (!route) return response.writeHead(404).end("missing");
   response.writeHead(200, {

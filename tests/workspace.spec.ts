@@ -55,7 +55,7 @@ test("live scan reports observed technologies with evidence", async ({
   );
   await page
     .getByRole("textbox", { name: "Website URL" })
-    .fill(`${FIXTURE}/next`);
+    .fill(`${FIXTURE}/moved`);
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeHidden();
   await expect(
@@ -76,6 +76,15 @@ test("live scan reports observed technologies with evidence", async ({
     .getByRole("button", { name: "Security", exact: true })
     .click();
   await expect(page.getByText("Final URL uses HTTP:")).toBeVisible();
+  const sections = page.getByRole("navigation", { name: "Report sections" });
+  await sections.getByRole("button", { name: "Performance" }).click();
+  await expect(page.getByText("HTTP status")).toBeVisible();
+  await expect(page.getByText(/not in a visitor's browser/)).toBeVisible();
+  await sections.getByRole("button", { name: "Network" }).click();
+  await expect(page.getByText("1 redirect", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("row", { name: "x-vercel-id icn1::fixture" }),
+  ).toBeVisible();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export report" }).click();
   expect((await download).suggestedFilename()).toBe("autopsy-127.0.0.1.json");
