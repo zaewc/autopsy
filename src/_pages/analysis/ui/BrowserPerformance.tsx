@@ -6,6 +6,11 @@ import {
   resourceLabel,
   shortUrl,
 } from "../lib/formatMetrics";
+import {
+  LAB_VITALS as VITALS,
+  displayVital as display,
+  rateVital as rating,
+} from "../lib/vitals";
 import { Waterfall } from "./Waterfall";
 
 const WATERFALL_ROWS = 12;
@@ -18,47 +23,6 @@ const CATEGORY_NAMES: Readonly<Record<string, string>> = {
   XHR: "Data requests",
   OTHER: "Other",
 };
-
-// web.dev thresholds: [good, needs improvement] upper bounds.
-const VITALS = [
-  {
-    key: "lcpMs",
-    name: "Largest Contentful Paint",
-    short: "LCP",
-    limits: [2500, 4000],
-  },
-  {
-    key: "cls",
-    name: "Cumulative Layout Shift",
-    short: "CLS",
-    limits: [0.1, 0.25],
-  },
-  {
-    key: "fcpMs",
-    name: "First Contentful Paint",
-    short: "FCP",
-    limits: [1800, 3000],
-  },
-  {
-    key: "ttfbMs",
-    name: "Time to First Byte",
-    short: "TTFB",
-    limits: [800, 1800],
-  },
-] as const;
-
-function rating(value: number, [good, poor]: readonly [number, number]) {
-  if (value <= good) return { label: "Good", tone: "good" };
-  if (value <= poor) return { label: "Needs improvement", tone: "warn" };
-  return { label: "Poor", tone: "warn" };
-}
-
-function display(key: (typeof VITALS)[number]["key"], value: number) {
-  if (key === "cls") return { value: value.toFixed(3), unit: "" };
-  return value >= 1000
-    ? { value: (value / 1000).toFixed(2), unit: "s" }
-    : { value: String(value), unit: "ms" };
-}
 
 /** Lab measurements from loading the page in the scanner's browser. */
 export function BrowserPerformance({

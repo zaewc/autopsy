@@ -15,7 +15,7 @@ import { AnalysisForm } from "@/features/run-analysis";
 import { Dialog } from "@/shared/ui/dialog";
 import { useReportWorkspace } from "../model/useReportWorkspace";
 import { ReportSidebar } from "./ReportSidebar";
-import { ReportSummary } from "./ReportSummary";
+import { ReportOverview } from "./ReportOverview";
 import { ReportTabs } from "./ReportTabs";
 import { ReportFooter } from "./ReportFooter";
 import { ScanStatus } from "./ScanStatus";
@@ -184,10 +184,6 @@ export function AnalysisWorkspace({
                   </>
                 )}
               </div>
-              <ReportSummary
-                report={report}
-                onFindings={() => setActive("Findings")}
-              />
               <ReportTabs active={active} onSelect={setActive} />
               <div
                 id="report-panel"
@@ -196,33 +192,25 @@ export function AnalysisWorkspace({
                 tabIndex={0}
                 key={report.url || report.domain}
               >
-                {(overview || active === "Technology") && (
+                {overview && (
+                  <ReportOverview report={report} onOpen={setActive} />
+                )}
+                {active === "Technology" && (
                   <TechnologySection
                     technologies={report.technologies}
                     live={live}
                   />
                 )}
-                {(overview ||
-                  active === "Performance" ||
-                  active === "Network") && (
+                {(active === "Performance" || active === "Network") && (
                   <ResponseSections
                     report={report}
-                    view={
-                      overview
-                        ? "overview"
-                        : active === "Network"
-                          ? "network"
-                          : "performance"
-                    }
+                    view={active === "Network" ? "network" : "performance"}
                   />
                 )}
-                {(overview || active === "Architecture") && (
-                  <ArchitectureSection
-                    report={report}
-                    details={active === "Architecture"}
-                  />
+                {active === "Architecture" && (
+                  <ArchitectureSection report={report} details />
                 )}
-                {(overview || active === "Findings") && (
+                {active === "Findings" && (
                   <FindingsSection findings={report.findings} />
                 )}
                 {(active === "Security" ||
