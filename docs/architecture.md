@@ -12,13 +12,13 @@ Single-page blocks stay in that page's `ui`; page-specific state stays in its `m
 
 Steiger applies its recommended FSD rules. Three narrowly documented compatibility settings follow Patchwork: prefixed Next.js layer names, App segments, and module-level Shared APIs. `scripts/checkArchitecture.mjs` independently enforces layer order (including the prefixed names), same-layer isolation, public API access, explicit route adapters, and cycles. Its negative-fixture tests ensure violations are rejected, including dynamic and type imports. No business slice is exempt from dependency checks.
 
-Server-only implementations must use separate `index.server.ts` APIs that import `server-only`; never export server dependencies from a client-safe barrel. The boundary checker treats `index.server.ts` as a public API, requires its `server-only` import, and rejects `"use client"` modules that import one. Route adapters may re-export an `_app` or `_pages` server API, such as a route handler. There is no live scanner or backend in this prototype.
+Server-only implementations must use separate `index.server.ts` APIs that import `server-only`; never export server dependencies from a client-safe barrel. The boundary checker treats `index.server.ts` as a public API, requires its `server-only` import, and rejects `"use client"` modules that import one. Route adapters may re-export an `_app` or `_pages` server API, such as a route handler. `features/run-analysis/index.server.ts` exposes the live scanner, `_app/api` owns route handlers, and `shared/lib/public-http` owns the public-network fetch guard.
 
 ## Product boundaries
 
 `_pages/analysis` owns the report workspace, its navigation, section selection, report export, and page-only sections. `_pages/new-analysis` owns the standalone entry experience. Neither page imports the other.
 
-`features/run-analysis` owns URL-entry state and the cancellable sample-scan lifecycle. Both pages consume its `AnalysisForm` public API and receive completion through a callback; the feature never imports a router or a page.
+`features/run-analysis` owns URL-entry state, the cancellable scan lifecycle, and the server-side `scanWebsite` action that fetches one public document and builds a live report. `GET /api/scan?url=` exposes it through `_app/api`. Both pages consume its `AnalysisForm` public API and receive completion through a callback; the feature never imports a router or a page.
 
 `entities/analysis-report` owns the report contract, sample fixtures, and the architecture evidence visualization. The domain is consumed by both the feature and report page. Generic URL normalization and native dialog behavior live in module-level Shared APIs.
 
