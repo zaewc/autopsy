@@ -1,9 +1,13 @@
 "use client";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { SAMPLE_FINDINGS as findings } from "@/entities/analysis-report";
+import type { Finding } from "@/entities/analysis-report";
 import { SectionHeading } from "@/shared/ui/section-heading";
-export function FindingsSection() {
+export function FindingsSection({
+  findings,
+}: {
+  findings: readonly Finding[];
+}) {
   const [filter, setFilter] = useState("All");
   const [expanded, setExpanded] = useState<number | null>(null);
   return (
@@ -18,7 +22,7 @@ export function FindingsSection() {
               onClick={() => setFilter(f)}
             >
               {f}
-              {f === "All" ? " 3" : ""}
+              {f === "All" ? ` ${findings.length}` : ""}
             </button>
           ))}
         </div>

@@ -1,4 +1,4 @@
-import type { AnalysisReport, Technology, Finding } from "./types";
+import type { AnalysisReport, AuditCheck, Technology, Finding } from "./types";
 export const SAMPLE_TECHNOLOGIES: readonly Technology[] = [
   {
     name: "Next.js",
@@ -74,6 +74,72 @@ export const SAMPLE_FINDINGS: readonly Finding[] = [
   },
 ];
 
+const check = (
+  area: AuditCheck["area"],
+  name: string,
+  status: AuditCheck["status"],
+  detail: string,
+): AuditCheck => ({ area, name, status, detail });
+export const SAMPLE_CHECKS: readonly AuditCheck[] = [
+  check("Security", "HTTPS", "Passed", "Encrypted transport detected"),
+  check(
+    "Security",
+    "Strict-Transport-Security",
+    "Passed",
+    "max-age=63072000; includeSubDomains",
+  ),
+  check("Security", "X-Content-Type-Options", "Passed", "nosniff"),
+  check(
+    "Security",
+    "Content-Security-Policy",
+    "Review",
+    "Header absent from sample response",
+  ),
+  check(
+    "Accessibility",
+    "Document language",
+    "Passed",
+    'The document declares lang="en"',
+  ),
+  check(
+    "Accessibility",
+    "Image dimensions",
+    "Review",
+    "3 images lack explicit dimensions",
+  ),
+  check(
+    "Accessibility",
+    "Landmark structure",
+    "Passed",
+    "Header, navigation, and main landmarks present",
+  ),
+  check(
+    "Accessibility",
+    "Manual testing",
+    "Manual",
+    "Keyboard and assistive technology testing is still needed",
+  ),
+  check("SEO", "Page title", "Passed", "A descriptive title is present"),
+  check(
+    "SEO",
+    "Meta description",
+    "Passed",
+    "Description is within a readable length",
+  ),
+  check(
+    "SEO",
+    "Canonical URL",
+    "Passed",
+    "A self-referencing canonical URL is present",
+  ),
+  check(
+    "SEO",
+    "Robots directives",
+    "Passed",
+    "The sample page allows indexing",
+  ),
+];
+
 export function createSampleReport(domain: string): AnalysisReport {
   return {
     domain,
@@ -81,5 +147,6 @@ export function createSampleReport(domain: string): AnalysisReport {
     notice: "Illustrative sample; no live website scan performed.",
     technologies: SAMPLE_TECHNOLOGIES,
     findings: SAMPLE_FINDINGS,
+    checks: SAMPLE_CHECKS,
   };
 }

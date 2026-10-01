@@ -7,6 +7,7 @@ interface Props {
   sidebar: boolean;
   active: ReportSection;
   history: string[];
+  findings: number;
   onAnalyze: () => void;
   onClose: () => void;
   onSelect: (section: ReportSection) => void;
@@ -16,6 +17,7 @@ export function ReportSidebar({
   sidebar,
   active,
   history,
+  findings,
   onAnalyze,
   onClose,
   onSelect,
@@ -96,7 +98,7 @@ export function ReportSidebar({
           >
             <Icon size={16} />
             {name}
-            {name === "Findings" && <span className="count">3</span>}
+            {name === "Findings" && <span className="count">{findings}</span>}
             {active === name && <span className="nav-dot" />}
           </button>
         ))}

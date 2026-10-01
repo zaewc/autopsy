@@ -26,4 +26,5 @@ export interface AnalysisReport {
   notice: string;
   technologies: readonly Technology[];
   findings: readonly Finding[];
+  checks: readonly AuditCheck[];
 }
