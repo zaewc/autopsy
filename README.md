@@ -58,3 +58,5 @@ npm run test:all
 ```
 
 Local tests use Chrome; CI installs Playwright Chromium. The harness builds and starts a production server on port 3100, with `.next-e2e` isolated from normal `.next` output, plus fixture websites on port 3101 (`tests/fixtures/siteServer.mjs`). `AUTOPSY_SCAN_FIXTURE_PORT` lets the scanner reach that loopback port during tests only; never set it in a deployment. Tests cover the sample report, live scans of fixture sites (including a page that mentions Next.js paths in prose), blocked and non-HTML targets, scan cancellation, evidence expansion, export, keyboard navigation, and desktop/mobile viewport fit. GitHub Actions runs these checks for every PR and push to `main`.
+
+Technology marks come from [Simple Icons](https://simpleicons.org) (CC0); the trademarks belong to their owners.

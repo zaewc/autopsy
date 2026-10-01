@@ -21,4 +21,5 @@ export {
   type ArchitectureNode,
   type ArchitectureRole,
 } from "./lib/architectureNodes";
+export { TechnologyLogo } from "./ui/TechnologyLogo";
 export { ArchitectureDiagram } from "./ui/ArchitectureDiagram";
