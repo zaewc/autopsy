@@ -1,10 +1,9 @@
 import type { ScannedDocument } from "@/entities/analysis-report";
 import { SectionHeading } from "@/shared/ui/section-heading";
+import { LongValue } from "./LongValue";
 import "./documentResponse.css";
 
 const number = new Intl.NumberFormat("en");
-/** Longer header values, such as large CSPs, start collapsed. */
-const LONG_VALUE = 240;
 const kilobytes = (bytes: number) =>
   `${new Intl.NumberFormat("en", { maximumFractionDigits: 1 }).format(bytes / 1000)} kB`;
 
@@ -96,17 +95,7 @@ function ResponseHeaders({
             <tr key={name}>
               <th scope="row">{name}</th>
               <td>
-                {value.length > LONG_VALUE ? (
-                  <details>
-                    <summary>
-                      {value.slice(0, 120)}… ({number.format(value.length)}{" "}
-                      characters, show all)
-                    </summary>
-                    {value}
-                  </details>
-                ) : (
-                  value
-                )}
+                <LongValue value={value} />
               </td>
             </tr>
           ))}

@@ -119,6 +119,23 @@ function audit(report: AnalysisReport, area: AuditArea) {
   };
 }
 
+function securitySummary(security: NonNullable<AnalysisReport["security"]>) {
+  const counts = (["high", "medium", "low", "info"] as const)
+    .map(
+      (severity) =>
+        [
+          severity,
+          security.issues.filter((issue) => issue.severity === severity).length,
+        ] as const,
+    )
+    .filter(([, count]) => count > 0)
+    .map(([severity, count]) => `${formatCount(count)} ${severity}`);
+  const advisories = security.vulnerabilities.length
+    ? ` · ${plural(security.vulnerabilities.length, "known vulnerability", "known vulnerabilities")}`
+    : "";
+  return (counts.join(" · ") || "No issues from passive checks") + advisories;
+}
+
 /** Every report area in one view, each linking to its full section. */
 export function ReportOverview({
   report,
@@ -184,7 +201,35 @@ export function ReportOverview({
         summary={path.map(({ name }) => name).join(" → ")}
         onOpen={onOpen}
       />
-      {(["Security", "Accessibility", "SEO"] as const).map((area) => {
+      {report.security && (
+        <Row
+          section="Security"
+          summary={securitySummary(report.security)}
+          onOpen={onOpen}
+        >
+          {report.security.issues.some(
+            ({ severity }) => severity !== "info",
+          ) && (
+            <ul className="glance-findings">
+              {report.security.issues
+                .filter(({ severity }) => severity !== "info")
+                .slice(0, 3)
+                .map(({ id, title, severity }) => (
+                  <li key={id}>
+                    <span className={`severity security-${severity}`}>
+                      {severity}
+                    </span>
+                    {title}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </Row>
+      )}
+      {(report.security
+        ? (["Accessibility", "SEO"] as const)
+        : (["Security", "Accessibility", "SEO"] as const)
+      ).map((area) => {
         const { summary, review } = audit(report, area);
         return (
           <Row key={area} section={area} summary={summary} onOpen={onOpen}>

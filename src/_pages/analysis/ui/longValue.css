@@ -1,0 +1,7 @@
+.long-value summary {
+  cursor: pointer;
+  color: var(--text);
+}
+.long-value[open] summary {
+  margin-bottom: var(--space-2);
+}

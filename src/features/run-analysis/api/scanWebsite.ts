@@ -1,6 +1,7 @@
 import {
   auditDocument,
   detectTechnologies,
+  securityFindings,
   runtimeProbe,
   type AnalysisReport,
   type BrowserObservation,
@@ -156,7 +157,7 @@ export async function scanWebsite(
       `The URL returned ${contentType.split(";")[0]}, not an HTML document.`,
     );
   const signals = { headers: document.headers, html: document.body };
-  const { checks, findings } = auditDocument({ url: document.url, ...signals });
+  const audit = auditDocument(signals);
   const observed = await observeInBrowser(document.url, signal);
   const technologies = detectTechnologies({
     ...signals,
@@ -176,8 +177,12 @@ export async function scanWebsite(
     scannedAt: new Date().toISOString(),
     notice: notice(document, observed.issue),
     technologies,
-    findings,
-    checks,
+    // Warnings first; security before document checks within each severity.
+    findings: [...securityFindings(security.issues), ...audit.findings].sort(
+      (a, b) =>
+        a.severity === b.severity ? 0 : a.severity === "warning" ? -1 : 1,
+    ),
+    checks: audit.checks,
     document: {
       status: document.status,
       contentType,

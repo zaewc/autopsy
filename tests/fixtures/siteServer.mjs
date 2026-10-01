@@ -11,6 +11,7 @@ const ROUTES = {
     headers: {
       "x-powered-by": "Next.js",
       "x-vercel-id": "icn1::fixture",
+      "set-cookie": "sid=fixture-secret; Path=/",
       "strict-transport-security": "max-age=63072000",
     },
     body: page(
@@ -40,6 +41,10 @@ createServer((request, response) => {
     );
     request.on("close", () => clearTimeout(timer));
     return;
+  }
+  if (path === "/.well-known/security.txt") {
+    response.writeHead(200, { "content-type": "text/plain" });
+    return response.end("Contact: mailto:security@fixture.test\n");
   }
   if (path === "/moved")
     return response.writeHead(301, { location: "/next" }).end();

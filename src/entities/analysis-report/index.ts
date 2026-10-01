@@ -43,6 +43,7 @@ export {
   type DependencyQuery,
 } from "./lib/dependencies";
 export { parseSecurityTxt, securityTxtIssues } from "./lib/securityTxt";
+export { securityFindings } from "./lib/securityFindings";
 export { auditDocument, type AuditInput } from "./lib/auditDocument";
 export {
   architectureNodes,
