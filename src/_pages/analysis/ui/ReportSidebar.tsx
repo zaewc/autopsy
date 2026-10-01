@@ -137,9 +137,9 @@ export function ReportSidebar({
       )}
       <div className="sidebar-bottom">
         <p className="sidebar-note">
-          Live scans read one HTML response.
+          Live scans load each page once
           <br />
-          <span>Scripts are not executed.</span>
+          <span>in a headless browser.</span>
         </p>
       </div>
     </aside>

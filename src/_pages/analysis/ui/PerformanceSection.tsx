@@ -1,5 +1,13 @@
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { Waterfall } from "./Waterfall";
+const SAMPLE_REQUESTS = [
+  { name: "document", type: "HTML", start: 0, duration: 360 },
+  { name: "main-app.js", type: "JS", start: 225, duration: 855 },
+  { name: "framework.js", type: "JS", start: 285, duration: 570 },
+  { name: "layout.css", type: "CSS", start: 255, duration: 300 },
+  { name: "inter-latin.woff2", type: "FONT", start: 450, duration: 420 },
+  { name: "hero.webp", type: "IMG", start: 570, duration: 630 },
+];
 export function PerformanceSection({ network = false }: { network?: boolean }) {
   return (
     <section>
@@ -67,14 +75,18 @@ export function PerformanceSection({ network = false }: { network?: boolean }) {
           <div className="subheading">
             Request waterfall<span>6 example requests</span>
           </div>
-          <Waterfall />
+          <Waterfall
+            requests={SAMPLE_REQUESTS}
+            timelineMs={1500}
+            measured={false}
+          />
         </div>
         <div className="resource-panel">
           <div className="subheading">
             Transferred resources<span>824 kB</span>
           </div>
           <div
-            className="resource-stack"
+            className="resource-stack sample"
             aria-label="JavaScript 59%, images 23%, fonts 10%, CSS 6%, other 2%"
           >
             <i />

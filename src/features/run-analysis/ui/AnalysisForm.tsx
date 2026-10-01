@@ -30,9 +30,9 @@ export function AnalysisForm({
         <br />a microscope.
       </h2>
       <p>
-        Enter a public website URL. autopsy fetches its HTML document once and
-        reports the technologies, response headers, and basic checks it can see.
-        Scripts are not executed.
+        Enter a public website URL. autopsy fetches its HTML document, loads the
+        page in a headless browser with scripts running, and reports the
+        technologies, timings, requests, and basic checks it can observe.
       </p>
       <form onSubmit={submit} noValidate>
         <Globe size={18} />

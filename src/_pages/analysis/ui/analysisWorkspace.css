@@ -436,6 +436,9 @@
 .vital-footer > span:first-child {
   color: var(--green);
 }
+.vital-footer > span.amber {
+  color: var(--amber);
+}
 .performance-details {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
@@ -516,17 +519,11 @@
   background: #a8c4a0;
   border-radius: 1px;
 }
-.bar-JS {
-  background: #c7b786;
-}
-.bar-CSS {
-  background: #b1a3c7;
-}
-.bar-FONT {
-  background: #8eb1cc;
-}
-.bar-IMG {
-  background: #98bea8;
+.waterfall-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .resource-stack {
   display: flex;
@@ -534,23 +531,23 @@
   height: 12px;
   margin: 22px 0 var(--space-4);
 }
-.resource-stack i {
+.resource-stack.sample i {
   background: #c7b786;
   width: 59%;
 }
-.resource-stack i:nth-child(2) {
+.resource-stack.sample i:nth-child(2) {
   background: #98bea8;
   width: 23%;
 }
-.resource-stack i:nth-child(3) {
+.resource-stack.sample i:nth-child(3) {
   background: #8eb1cc;
   width: 10%;
 }
-.resource-stack i:nth-child(4) {
+.resource-stack.sample i:nth-child(4) {
   background: #b1a3c7;
   width: 6%;
 }
-.resource-stack i:nth-child(5) {
+.resource-stack.sample i:nth-child(5) {
   background: #8b9690;
   width: 2%;
 }
@@ -577,6 +574,28 @@
   background: #b1a3c7;
 }
 .color-4 {
+  background: #8b9690;
+}
+/* Resource type colors; after .resource-color so they apply to its dots. */
+.bar-HTML {
+  background: #a8c4a0;
+}
+.bar-JS {
+  background: #c7b786;
+}
+.bar-CSS {
+  background: #b1a3c7;
+}
+.bar-FONT {
+  background: #8eb1cc;
+}
+.bar-IMG {
+  background: #98bea8;
+}
+.bar-XHR {
+  background: #d3a98b;
+}
+.bar-OTHER {
   background: #8b9690;
 }
 .resource-row > span {

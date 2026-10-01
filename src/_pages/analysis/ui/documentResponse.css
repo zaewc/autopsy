@@ -99,3 +99,28 @@
     gap: var(--space-1);
   }
 }
+.request-table thead th:first-child {
+  width: auto;
+}
+.request-table thead th:not(:first-child),
+.request-table td {
+  width: 88px;
+  white-space: nowrap;
+}
+.request-table tbody th {
+  font-size: 11px;
+}
+.show-all {
+  margin-top: var(--space-4);
+}
+@media (max-width: 600px) {
+  .request-table td {
+    display: inline-block;
+    width: auto;
+    margin-right: var(--space-4);
+  }
+  .request-table td::before {
+    content: attr(data-label) " ";
+    color: var(--muted);
+  }
+}

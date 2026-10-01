@@ -8,7 +8,13 @@ const LONG_VALUE = 240;
 const kilobytes = (bytes: number) =>
   `${new Intl.NumberFormat("en", { maximumFractionDigits: 1 }).format(bytes / 1000)} kB`;
 
-function ResponseSummary({ document }: { document: ScannedDocument }) {
+function ResponseSummary({
+  document,
+  browserMeasured,
+}: {
+  document: ScannedDocument;
+  browserMeasured: boolean;
+}) {
   const metrics = [
     ["HTTP status", String(document.status)],
     ["Response time", `${number.format(document.responseMs)} ms`],
@@ -34,8 +40,10 @@ function ResponseSummary({ document }: { document: ScannedDocument }) {
       <p className="empty-note">
         Response time runs until the response headers arrived at the autopsy
         server, not in a visitor&apos;s browser. Resource counts are elements
-        referenced by the HTML document. Core Web Vitals and a request waterfall
-        need a browser run and are not measured.
+        referenced by the HTML document.
+        {browserMeasured
+          ? " Browser timings above come from a separate page load."
+          : " Core Web Vitals and a request waterfall need a browser run and were not measured."}
       </p>
     </>
   );
@@ -113,10 +121,13 @@ export function DocumentResponse({
   url,
   document,
   network,
+  browserMeasured,
 }: {
   url: string;
   document: ScannedDocument;
   network: boolean;
+  /** A browser stage measured this page, so its metrics appear elsewhere. */
+  browserMeasured: boolean;
 }) {
   return (
     <section>
@@ -128,7 +139,10 @@ export function DocumentResponse({
       {network ? (
         <ResponseHeaders url={url} document={document} />
       ) : (
-        <ResponseSummary document={document} />
+        <ResponseSummary
+          document={document}
+          browserMeasured={browserMeasured}
+        />
       )}
     </section>
   );

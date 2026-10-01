@@ -18,12 +18,16 @@ npm run typecheck
 
 ## Scope
 
-Entering a URL runs a live scan. The autopsy server fetches that one HTML document (following up to 5 redirects, within 10 seconds and 2 MB) and reports:
+Entering a URL runs a live scan in two stages:
 
-- technologies identified from response headers and HTML markup, each with the matched evidence and an observed/inferred basis;
-- security header, document language, image, and search metadata checks, with findings for the items that need review.
+1. **HTML response.** The autopsy server fetches the document (up to 5 redirects, 10 seconds, 2 MB) for response headers, markup, and security header, document language, image, and search metadata checks.
+2. **Browser.** Headless Chromium loads the page with scripts running (DOMContentLoaded within 20 seconds, then up to 8 seconds for load and 3 seconds for network idle). It records the rendered DOM, framework and library runtime globals, up to 300 requests, console errors, and lab TTFB, FCP, LCP, and CLS on a desktop viewport without throttling. Interaction latency (INP) is not measured.
 
-Scripts are not executed, so client-rendered libraries, Core Web Vitals, and request waterfalls are not measured. The scanner only connects to public internet addresses on ports 80 and 443: private, loopback, link-local, and reserved hosts are rejected at every redirect and at socket connection time. There is no rate limiting yet; add it before exposing the scanner publicly.
+Technologies are identified from both stages, each with the matched evidence (header, HTML, rendered DOM, runtime global, or network request) and an observed/inferred basis. If the browser cannot run, the report keeps the HTML-stage results and says why.
+
+Both stages only reach public internet addresses on ports 80 and 443. The HTML fetch checks every redirect and every socket connection. Every browser request, including page scripts' fetches and WebSockets, goes through a loopback proxy that applies the same check at connection time and refuses private, loopback, link-local, and reserved destinations; refused destinations are listed in the report. WebRTC is limited to proxied connections, and service workers and downloads are disabled. At most two browser scans run at once. There is no rate limiting yet; add it before exposing the scanner publicly.
+
+The server needs a Chromium build for the browser stage: run `npx playwright install chromium`. Set `AUTOPSY_BROWSER_SCAN=0` to turn the stage off on servers without it.
 
 `/` without a URL shows an illustrative sample report that is not attributed to any website. Recent scans are held in memory for the current session. JSON exports keep the `sample` or `live` designation.
 
@@ -37,7 +41,7 @@ Use Node 24 (`nvm use`). Routes are thin re-exports; product code follows Featur
 - `features/run-analysis`: URL form, client scan lifecycle, and the server-only `scanWebsite`.
 - `entities/analysis-report`: report types, technology detection, document audit, the sample fixture, and architecture evidence visualization.
 - `_pages/analysis`: report composition, navigation, section state, and export actions.
-- `shared`: URL normalization, the server-only public-network fetch, and reusable UI primitives.
+- `shared`: URL normalization, the server-only public-network fetch and proxy, proxied headless-browser capture, and reusable UI primitives.
 
 ```sh
 npm run check
