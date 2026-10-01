@@ -1246,3 +1246,83 @@
     transparent 33.333%
   );
 }
+.summary-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  color: var(--green);
+  white-space: nowrap;
+}
+.technology-list {
+  border-top: 1px solid var(--line);
+}
+.technology-columns,
+.technology-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 12px;
+  text-align: left;
+  width: 100%;
+}
+.technology-columns {
+  color: var(--muted);
+  font-size: 12px;
+}
+.technology-item {
+  border-bottom: 1px solid var(--line);
+}
+.technology-row {
+  min-height: 52px;
+}
+.technology-row:hover {
+  background: var(--panel);
+}
+.technology-name {
+  font-weight: 500;
+}
+.technology-name small {
+  font: 11px var(--mono);
+  color: var(--muted);
+  margin-left: 12px;
+}
+.technology-role {
+  color: var(--muted);
+}
+.technology-basis {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+}
+.sidebar-note {
+  font-size: 12px;
+  line-height: 1.8;
+  padding: 16px 8px;
+  color: var(--muted);
+}
+.sample-note strong {
+  white-space: nowrap;
+}
+.overview-banner {
+  background: var(--panel);
+}
+@media (max-width: 700px) {
+  .summary-action {
+    padding-left: 0;
+  }
+  .technology-columns,
+  .technology-row {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 12px;
+  }
+  .technology-role,
+  .technology-columns span:nth-child(2) {
+    display: none;
+  }
+  .overview-banner .health-copy {
+    min-width: 100%;
+  }
+}

@@ -7,7 +7,7 @@ export function ArchitectureSection({
 }) {
   return (
     <section>
-      <SectionHeading number="03" title="Architecture signals">
+      <SectionHeading title="Architecture signals">
         <div className="legend">
           <span>
             <i />

@@ -7,7 +7,7 @@ export function AuditSection({
 }) {
   return (
     <section>
-      <SectionHeading number="05" title={`${active} inspection`}>
+      <SectionHeading title={`${active} inspection`}>
         <span className="muted-caption">Sample checks</span>
       </SectionHeading>
       <div className="audit-table">

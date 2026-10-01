@@ -21,14 +21,14 @@ test("report exploration and URL scan demonstration", async ({ page }) => {
   ).toHaveCount(0);
   await page.getByRole("button", { name: "New analysis" }).click();
   await page.getByRole("textbox", { name: "Website URL" }).fill("invalid");
-  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await page.getByRole("button", { name: "Open sample", exact: true }).click();
   await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
     "valid website URL",
   );
   await page
     .getByRole("textbox", { name: "Website URL" })
     .fill("https://example.com");
-  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await page.getByRole("button", { name: "Open sample", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeHidden({ timeout: 10000 });
   await expect(
     page.getByRole("heading", {
@@ -75,7 +75,7 @@ test("landing scan opens the requested sample report", async ({ page }) => {
   await page
     .getByRole("textbox", { name: "Website URL" })
     .fill("https://example.org/path");
-  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await page.getByRole("button", { name: "Open sample", exact: true }).click();
   await expect(page).toHaveURL(/site=example.org/, { timeout: 15000 });
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "example.org",
@@ -101,7 +101,7 @@ test("keyboard navigation, dialog cancellation, and evidence are accessible", as
   await page.keyboard.press("ControlOrMeta+k");
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.getByRole("textbox", { name: "Website URL" }).fill("example.net");
-  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await page.getByRole("button", { name: "Open sample", exact: true }).click();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toBeHidden();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(

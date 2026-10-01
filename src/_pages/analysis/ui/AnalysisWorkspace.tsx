@@ -7,7 +7,6 @@ import {
   Copy,
   ArrowUpRight,
   Download,
-  Clock,
   ArrowRight,
   X,
 } from "lucide-react";
@@ -77,7 +76,6 @@ export function AnalysisWorkspace({
             <span>{domain}</span>
           </div>
           <div>
-            <span className="sample-badge">SAMPLE REPORT</span>
             <button
               className="icon-button"
               aria-label="Copy report JSON"
@@ -88,10 +86,7 @@ export function AnalysisWorkspace({
           </div>
         </header>
         <main>
-          <div className="eyebrow">
-            <span className="green-dot" /> WEBSITE ANALYSIS{" "}
-            <span className="report-id">REPORT / 000142</span>
-          </div>
+          <div className="eyebrow">Website report</div>
           <div className="report-heading">
             <div>
               <h1>
@@ -105,7 +100,7 @@ export function AnalysisWorkspace({
                   <ArrowUpRight size={22} />
                 </a>
               </h1>
-              <p>Your website, under the microscope.</p>
+              <p>Technology, resource timings, and findings</p>
             </div>
             <button className="secondary-button" onClick={download}>
               <Download size={14} />
@@ -113,28 +108,16 @@ export function AnalysisWorkspace({
             </button>
           </div>
           <div className="report-meta">
-            <span>
-              <Clock size={12} />
-              Illustrative demo
-            </span>
-            <span>
-              <Globe size={12} />
-              Desktop · Chrome 124
-            </span>
-            <span>
-              <Check size={12} />8 diagnostic categories
-            </span>
             <button onClick={() => setModal(true)}>
               Analyze another website
               <ArrowRight size={13} />
             </button>
           </div>
           <div className="sample-note">
-            <span>EXAMPLE DATA</span>This interactive report demonstrates
-            autopsy. Values are illustrative; no live website scan has been
-            performed.
+            <strong>Sample report.</strong> These values illustrate a report
+            layout; no live website scan has been performed.
           </div>
-          <ReportSummary />
+          <ReportSummary onFindings={() => setActive("Findings")} />
           <ReportTabs active={active} onSelect={setActive} />
           <div
             id="report-panel"

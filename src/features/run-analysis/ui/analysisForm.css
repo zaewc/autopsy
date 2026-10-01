@@ -213,3 +213,8 @@
 .analysis-content {
   min-width: 0;
 }
+.scan-track i {
+  width: 100%;
+  transform-origin: left;
+  transition: transform 0.2s ease-out;
+}
