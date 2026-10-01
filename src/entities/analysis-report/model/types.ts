@@ -20,6 +20,58 @@ export interface AuditCheck {
   status: "Passed" | "Review" | "Manual";
   detail: string;
 }
+export type SecuritySeverity = "high" | "medium" | "low" | "info";
+export type SecurityCategory =
+  | "Transport"
+  | "Headers"
+  | "Content Security Policy"
+  | "Cookies"
+  | "Content"
+  | "Dependencies"
+  | "Disclosure";
+/** A passively observed weakness, with evidence and a fix. */
+export interface SecurityIssue {
+  id: string;
+  category: SecurityCategory;
+  severity: SecuritySeverity;
+  title: string;
+  evidence: string;
+  impact: string;
+  fix: string;
+  references: readonly { label: string; url: string }[];
+}
+export interface SecurityHeader {
+  name: string;
+  /** Null when the response does not send it. */
+  value: string | null;
+}
+export interface CspDirective {
+  name: string;
+  values: readonly string[];
+}
+/** Cookie name and attributes; the value is never kept. */
+export interface CookieSummary {
+  name: string;
+  secure: boolean;
+  httpOnly: boolean;
+  sameSite: string | null;
+  domain: string | null;
+  path: string | null;
+  persistent: boolean;
+}
+export interface TlsSummary {
+  protocol: string | null;
+  cipher: string | null;
+  authorized: boolean;
+  certificate: {
+    subject: string | null;
+    issuer: string | null;
+    names: readonly string[];
+    validFrom: string | null;
+    validTo: string | null;
+  } | null;
+}
+
 /** The single HTTP response a live scan inspected. */
 export interface ScannedDocument {
   status: number;
