@@ -2,8 +2,6 @@ import type { AuditCheck, AuditArea, Finding } from "../model/types";
 import { tags, visibleMarkup } from "./markup";
 
 export interface AuditInput {
-  /** Final URL after redirects. */
-  url: string;
   /** Lower-cased response header names. */
   headers: Readonly<Record<string, string>>;
   html: string;
@@ -45,11 +43,11 @@ interface Rule {
 }
 
 /**
- * Check one HTML response for public security headers, document semantics, and
- * search metadata. These are static checks of a single document, not a full
- * accessibility or security audit.
+ * Check one HTML response for document semantics and search metadata. These
+ * are static checks of a single document, not a full accessibility audit;
+ * security is reviewed separately by analyzeSecurity and analyzeContent.
  */
-export function auditDocument({ url, headers, html }: AuditInput): {
+export function auditDocument({ headers, html }: AuditInput): {
   checks: AuditCheck[];
   findings: Finding[];
 } {
@@ -63,7 +61,6 @@ export function auditDocument({ url, headers, html }: AuditInput): {
   const missingSize = images.filter(
     (image) => !image.width || !image.height,
   ).length;
-  const csp = headers["content-security-policy"];
   const title = markup.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i)?.[1].trim();
   const description = decodeEntities(meta("description") ?? "").trim();
   const canonical = tags(markup, "link").find((link) =>
@@ -75,88 +72,6 @@ export function auditDocument({ url, headers, html }: AuditInput): {
   const language = tags(markup, "html")[0]?.lang?.trim();
   const imageCount = `${images.length} image${images.length === 1 ? "" : "s"}`;
   const rules: Rule[] = [
-    {
-      area: "Security",
-      name: "HTTPS",
-      pass: () =>
-        url.startsWith("https:")
-          ? "Final response was served over HTTPS"
-          : null,
-      review: `Final URL uses HTTP: ${url}`,
-      finding: {
-        severity: "warning",
-        title: "Page is served without HTTPS",
-        why: "Unencrypted responses can be read or modified by anyone on the network path.",
-        fix: "Serve the site over HTTPS and redirect HTTP requests to it.",
-      },
-    },
-    {
-      area: "Security",
-      name: "Strict-Transport-Security",
-      pass: () => headers["strict-transport-security"] ?? null,
-      review: "Header absent from the response",
-      finding: {
-        severity: "info",
-        title: "HSTS is not configured",
-        why: "Without HSTS, a first visit or typed http:// address can be downgraded before the redirect to HTTPS.",
-        fix: "Send Strict-Transport-Security with a long max-age once HTTPS works on every subdomain you include.",
-      },
-    },
-    {
-      area: "Security",
-      name: "Content-Security-Policy",
-      pass: () =>
-        csp
-          ? `${csp.split(";").filter((part) => part.trim()).length} directives`
-          : null,
-      review: headers["content-security-policy-report-only"]
-        ? "Only a report-only policy is sent; it does not block anything"
-        : "Header absent from the response",
-      finding: {
-        severity: "info",
-        title: "Content Security Policy is not enforced",
-        why: "A content security policy limits which scripts and resources the browser will load, reducing the impact of injected markup.",
-        fix: "Start with a report-only policy, review its reports, then enforce restricted script and resource origins.",
-      },
-    },
-    {
-      area: "Security",
-      name: "X-Content-Type-Options",
-      pass: () =>
-        headers["x-content-type-options"]?.toLowerCase() === "nosniff"
-          ? "nosniff"
-          : null,
-      review: "nosniff is not set",
-      finding: {
-        severity: "info",
-        title: "MIME type sniffing is not disabled",
-        why: "Browsers may interpret responses as a different content type than the server declared.",
-        fix: "Send X-Content-Type-Options: nosniff.",
-      },
-    },
-    {
-      area: "Security",
-      name: "Framing protection",
-      pass: () =>
-        /frame-ancestors/i.test(csp ?? "")
-          ? "CSP frame-ancestors is set"
-          : headers["x-frame-options"]
-            ? `X-Frame-Options: ${headers["x-frame-options"]}`
-            : null,
-      review: "Neither X-Frame-Options nor CSP frame-ancestors is set",
-      finding: {
-        severity: "info",
-        title: "Page can be embedded by other sites",
-        why: "Pages that can be framed by any origin are exposed to clickjacking.",
-        fix: "Set CSP frame-ancestors (or X-Frame-Options) to the origins allowed to embed the page.",
-      },
-    },
-    {
-      area: "Security",
-      name: "Referrer-Policy",
-      pass: () => headers["referrer-policy"] ?? null,
-      review: "Header absent; the browser default policy applies",
-    },
     {
       area: "Accessibility",
       name: "Document language",

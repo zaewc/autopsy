@@ -24,6 +24,7 @@ import { ResponseSections } from "./ResponseSections";
 import { ArchitectureSection } from "./ArchitectureSection";
 import { FindingsSection } from "./FindingsSection";
 import { AuditSection } from "./AuditSection";
+import { SecurityExplorer } from "./SecurityExplorer";
 import "./analysisWorkspace.css";
 
 function scanDescription(report: AnalysisReport) {
@@ -213,7 +214,10 @@ export function AnalysisWorkspace({
                 {active === "Findings" && (
                   <FindingsSection findings={report.findings} />
                 )}
-                {(active === "Security" ||
+                {active === "Security" && report.security && (
+                  <SecurityExplorer security={report.security} />
+                )}
+                {((active === "Security" && !report.security) ||
                   active === "Accessibility" ||
                   active === "SEO") && (
                   <AuditSection

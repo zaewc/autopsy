@@ -110,7 +110,25 @@ test("live scan reports observed technologies with evidence", async ({
     .getByRole("navigation", { name: "Report sections" })
     .getByRole("button", { name: "Security", exact: true })
     .click();
-  await expect(page.getByText("Final URL uses HTTP:")).toBeVisible();
+  const issue = page.getByRole("button", {
+    name: /high\s*Page is served without HTTPS/,
+  });
+  await issue.click();
+  await expect(
+    page.getByText("Final URL: http://127.0.0.1:3101/next"),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /OWASP: Transport Layer Security/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /^high/, pressed: true }).click();
+  await expect(issue).toBeHidden();
+  await expect(
+    page.getByRole("row", { name: /sid No No Not set/ }),
+  ).toBeVisible();
+  await expect(
+    page.locator(".security-detail", { hasText: "security.txt" }),
+  ).toContainText("mailto:security@fixture.test");
+  await expect(page.getByText(/fixture-secret/)).toHaveCount(0);
   const sections = page.getByRole("navigation", { name: "Report sections" });
   await sections.getByRole("button", { name: "Performance" }).click();
   await expect(page.getByText("HTTP status")).toBeVisible();
