@@ -8,3 +8,8 @@ export {
   type FetchOptions,
   type PublicDocument,
 } from "./fetchPublicDocument";
+export {
+  startPublicProxy,
+  type ProxyOptions,
+  type PublicProxy,
+} from "./publicProxy";
