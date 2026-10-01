@@ -1,19 +1,61 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { fetchPublicDocument, PublicFetchError } = vi.hoisted(() => ({
-  fetchPublicDocument: vi.fn(),
-  PublicFetchError: class extends Error {
-    code: string;
-    constructor(code: string, message: string) {
-      super(message);
-      this.code = code;
+const { fetchPublicDocument, PublicFetchError, renderPage, RenderError } =
+  vi.hoisted(() => {
+    class CodedError extends Error {
+      code: string;
+      constructor(code: string, message: string) {
+        super(message);
+        this.code = code;
+      }
     }
-  },
-}));
+    return {
+      fetchPublicDocument: vi.fn(),
+      PublicFetchError: class extends CodedError {},
+      renderPage: vi.fn(),
+      RenderError: class extends CodedError {},
+    };
+  });
 vi.mock("@/shared/lib/public-http/index.server", () => ({
   fetchPublicDocument,
   PublicFetchError,
+  isPublicAddress: () => true,
 }));
+vi.mock("@/shared/lib/rendered-page/index.server", () => ({
+  renderPage,
+  RenderError,
+}));
+
+const RENDERED = {
+  url: "https://github.com/",
+  html: '<div id="root"></div>',
+  truncated: false,
+  requests: [
+    {
+      url: "https://github.com/",
+      type: "document",
+      status: 200,
+      bytes: 1000,
+      startMs: 0,
+      durationMs: 300,
+      failure: null,
+    },
+    {
+      url: "https://www.googletagmanager.com/gtag/js?id=G-1",
+      type: "script",
+      status: 200,
+      bytes: 5000,
+      startMs: 320,
+      durationMs: 80,
+      failure: null,
+    },
+  ],
+  requestsTruncated: false,
+  vitals: { ttfbMs: 200, fcpMs: 500, lcpMs: 900, cls: 0.01 },
+  consoleErrors: 1,
+  blocked: ["10.0.0.1:80"],
+  probe: { react: "present" },
+};
 
 const { scanWebsite, ScanError } = await import("./scanWebsite");
 
@@ -41,6 +83,41 @@ describe("scanWebsite", () => {
   // A returned function would run as teardown, so do not return the mock.
   beforeEach(() => {
     fetchPublicDocument.mockReset();
+    renderPage.mockReset();
+    renderPage.mockRejectedValue(
+      new RenderError(
+        "unavailable",
+        "The scanning browser could not be started.",
+      ),
+    );
+  });
+
+  it("adds browser observations and runtime technologies", async () => {
+    respond({ headers: { "content-type": "text/html", server: "github.com" } });
+    renderPage.mockResolvedValue(RENDERED);
+    const report = await scanWebsite("github.com");
+    expect(renderPage.mock.calls[0][0]).toBe("https://github.com/");
+    expect(report.technologies.map(({ name }) => name)).toEqual([
+      "React",
+      "GitHub",
+      "Google Analytics",
+    ]);
+    expect(report.browser).toMatchObject({
+      vitals: { lcpMs: 900 },
+      consoleErrors: 1,
+      blocked: ["10.0.0.1:80"],
+    });
+    expect(report.browser?.requests).toHaveLength(2);
+    expect(report.notice).toMatch(/headless Chromium with scripts running/);
+  });
+
+  it("falls back to the HTML response when the browser stage fails", async () => {
+    respond({});
+    const report = await scanWebsite("github.com");
+    expect(report.browser).toBeNull();
+    expect(report.notice).toMatch(
+      /^Browser stage unavailable: The scanning browser could not be started\./,
+    );
   });
 
   it("builds a live report from the fetched document", async () => {
@@ -78,7 +155,7 @@ describe("scanWebsite", () => {
     );
     expect(JSON.stringify(report)).not.toContain("secret");
     expect(Date.parse(report.scannedAt ?? "")).not.toBeNaN();
-    expect(report.notice).toMatch(/Scripts were not executed/);
+    expect(report.notice).toMatch(/scripts were not executed/);
   });
 
   it("explains non-success responses and truncation in the notice", async () => {

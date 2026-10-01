@@ -63,7 +63,7 @@ test("live scan reports observed technologies with evidence", async ({
   ).toBeVisible({ timeout: 15000 });
   await expect(page).toHaveURL(/site=http%3A%2F%2F127\.0\.0\.1%3A3101%2Fnext/);
   await expect(page.locator(".report-note")).toContainText(
-    "Scripts were not executed",
+    "headless Chromium with scripts running",
   );
   await page
     .locator(".technology-list")

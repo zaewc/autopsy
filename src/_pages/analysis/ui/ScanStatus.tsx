@@ -29,8 +29,9 @@ export function ScanStatus({
         </p>
       ) : (
         <p role="status">
-          Fetching the HTML document and response headers. This usually takes a
-          few seconds and stops after 10 seconds.
+          Fetching the HTML document, then loading the page in a headless
+          browser with scripts running. This usually takes 5 to 15 seconds and
+          stops after about 40 seconds.
         </p>
       )}
       <div className="report-actions">
