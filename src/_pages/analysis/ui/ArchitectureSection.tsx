@@ -1,22 +1,17 @@
 import { SectionHeading } from "@/shared/ui/section-heading";
-import { ArchitectureDiagram } from "@/entities/analysis-report";
+import {
+  ArchitectureDiagram,
+  architectureNodes,
+  type AnalysisReport,
+} from "@/entities/analysis-report";
 export function ArchitectureSection({
+  report,
   details = false,
-  live,
 }: {
+  report: AnalysisReport;
   details?: boolean;
-  live: boolean;
 }) {
-  if (live)
-    return (
-      <section>
-        <SectionHeading title="Architecture signals" />
-        <p className="empty-note">
-          The architecture view is only drawn for the sample report. For this
-          scan, hosting and CDN signals are listed under Technology.
-        </p>
-      </section>
-    );
+  const live = report.mode === "live";
   return (
     <section>
       <SectionHeading title="Architecture signals">
@@ -27,16 +22,16 @@ export function ArchitectureSection({
           </span>
           <span>
             <i />
-            Inferred
+            {live ? "Not observable" : "Inferred"}
           </span>
         </div>
       </SectionHeading>
-      <ArchitectureDiagram />
+      <ArchitectureDiagram nodes={architectureNodes(report)} />
       {details && (
         <p className="architecture-note">
-          Only public response headers, document content, and network activity
-          can be observed. The external API is a hypothesis; private servers,
-          databases, and internal topology are unknown.
+          {live
+            ? "Only layers with an observed header or markup signal are drawn, in request order. A missing layer means no signal was found, not that the layer is absent. Private servers, databases, and internal topology are unknown."
+            : "Only public response headers, document content, and network activity can be observed. The external API is a hypothesis; private servers, databases, and internal topology are unknown."}
         </p>
       )}
     </section>

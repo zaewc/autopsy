@@ -38,9 +38,12 @@
   align-items: center;
 }
 .node strong {
+  min-width: 0;
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .node small {
   font-size: 11px;
