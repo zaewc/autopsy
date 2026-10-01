@@ -40,6 +40,13 @@ export interface SecurityIssue {
   fix: string;
   references: readonly { label: string; url: string }[];
 }
+/** Scripts loaded from another site, grouped by origin. */
+export interface ThirdPartyScript {
+  origin: string;
+  count: number;
+  /** Script tags that carry an integrity hash. */
+  withIntegrity: number;
+}
 export interface SecurityHeader {
   name: string;
   /** Null when the response does not send it. */
