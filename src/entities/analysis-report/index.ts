@@ -16,6 +16,8 @@ export type {
   SecuritySeverity,
   ThirdPartyScript,
   KnownVulnerability,
+  SecurityReport,
+  SecurityTxt,
   TlsSummary,
 } from "./model/types";
 export {
@@ -40,6 +42,7 @@ export {
   dependencyQueries,
   type DependencyQuery,
 } from "./lib/dependencies";
+export { parseSecurityTxt, securityTxtIssues } from "./lib/securityTxt";
 export { auditDocument, type AuditInput } from "./lib/auditDocument";
 export {
   architectureNodes,

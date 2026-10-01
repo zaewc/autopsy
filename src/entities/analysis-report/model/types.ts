@@ -92,6 +92,31 @@ export interface TlsSummary {
   } | null;
 }
 
+export interface SecurityTxt {
+  url: string;
+  contact: readonly string[];
+  expires: string | null;
+  expired: boolean;
+  policy: string | null;
+}
+/** Passive security review of a live scan. */
+export interface SecurityReport {
+  /** Sorted by severity, highest first. */
+  issues: readonly SecurityIssue[];
+  headers: readonly SecurityHeader[];
+  csp: { reportOnly: boolean; directives: readonly CspDirective[] } | null;
+  cookies: readonly CookieSummary[];
+  tls: TlsSummary | null;
+  thirdPartyScripts: readonly ThirdPartyScript[];
+  vulnerabilities: readonly KnownVulnerability[];
+  dependencyCheck: {
+    /** package@version pairs looked up in OSV.dev. */
+    checked: readonly string[];
+    status: "checked" | "unavailable" | "none";
+  };
+  securityTxt: SecurityTxt | null;
+}
+
 /** The single HTTP response a live scan inspected. */
 export interface ScannedDocument {
   status: number;
@@ -149,4 +174,6 @@ export interface AnalysisReport {
   document: ScannedDocument | null;
   /** Live scans whose browser stage succeeded. */
   browser: BrowserObservation | null;
+  /** Live scans only. */
+  security: SecurityReport | null;
 }
