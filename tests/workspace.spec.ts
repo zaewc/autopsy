@@ -1,13 +1,26 @@
-import { test, expect } from "@playwright/test";
-test("report exploration and URL scan demonstration", async ({ page }) => {
+import { test, expect, type Page } from "@playwright/test";
+const FIXTURE = "http://127.0.0.1:3101";
+
+async function analyze(page: Page, url: string) {
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: "New analysis", exact: true })
+    .click();
+  await page.getByRole("textbox", { name: "Website URL" }).fill(url);
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+}
+
+test("sample report is labelled and not attributed to a website", async ({
+  page,
+}) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
   await expect(
-    page.getByRole("heading", {
-      name: "linear.app Open linear.app",
-      exact: true,
-    }),
+    page.getByRole("heading", { level: 1, name: "Sample report" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/do not describe any real website/),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "JavaScript payload could be smaller" })
@@ -19,23 +32,6 @@ test("report exploration and URL scan demonstration", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "JavaScript payload could be smaller" }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: "New analysis", exact: true }).click();
-  await page.getByRole("textbox", { name: "Website URL" }).fill("invalid");
-  await page.getByRole("button", { name: "Open sample", exact: true }).click();
-  await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
-    "valid website URL",
-  );
-  await page
-    .getByRole("textbox", { name: "Website URL" })
-    .fill("https://example.com");
-  await page.getByRole("button", { name: "Open sample", exact: true }).click();
-  await expect(page.getByRole("dialog")).toBeHidden({ timeout: 10000 });
-  await expect(
-    page.getByRole("heading", {
-      name: "example.com Open example.com",
-      exact: true,
-    }),
-  ).toBeVisible();
   await page
     .getByRole("navigation", { name: "Report sections" })
     .getByRole("button", { name: "Security", exact: true })
@@ -45,52 +41,96 @@ test("report exploration and URL scan demonstration", async ({ page }) => {
   ).toBeVisible();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export report" }).click();
-  expect((await download).suggestedFilename()).toBe("autopsy-example.com.json");
+  expect((await download).suggestedFilename()).toBe("autopsy-sample.json");
   expect(errors).toEqual([]);
 });
-test("desktop and mobile layouts fit the viewport", async ({ page }) => {
-  for (const width of [1440, 390]) {
-    await page.setViewportSize({ width, height: 1000 });
-    await page.goto("/");
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= window.innerWidth,
-      ),
-    ).toBeTruthy();
-    if (width === 390) {
-      await page.getByRole("button", { name: "Toggle navigation" }).click();
-      await page
-        .getByRole("button", { name: "New analysis", exact: true })
-        .click();
-      await expect(page.getByRole("dialog")).toBeVisible();
-      await page.getByRole("button", { name: "Close new analysis" }).click();
-    }
-    await page.screenshot({
-      path: test.info().outputPath(`autopsy-${width}.png`),
-      fullPage: true,
-    });
-  }
+
+test("live scan reports observed technologies with evidence", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await analyze(page, "invalid");
+  await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
+    "valid website URL",
+  );
+  await page
+    .getByRole("textbox", { name: "Website URL" })
+    .fill(`${FIXTURE}/next`);
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await expect(page.getByRole("dialog")).toBeHidden();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "127.0.0.1 Open 127.0.0.1" }),
+  ).toBeVisible({ timeout: 15000 });
+  await expect(page).toHaveURL(/site=http%3A%2F%2F127\.0\.0\.1%3A3101%2Fnext/);
+  await expect(page.locator(".report-note")).toContainText(
+    "Scripts were not executed",
+  );
+  await page.getByRole("button", { name: /^Next\.js/ }).click();
+  await expect(
+    page.getByText("Response header x-powered-by: Next.js"),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /^React/ }).click();
+  await expect(page.getByText(/Inferred because Next\.js/)).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Report sections" })
+    .getByRole("button", { name: "Security", exact: true })
+    .click();
+  await expect(page.getByText("Final URL uses HTTP:")).toBeVisible();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export report" }).click();
+  expect((await download).suggestedFilename()).toBe("autopsy-127.0.0.1.json");
 });
 
-test("landing scan opens the requested sample report", async ({ page }) => {
+test("prose mentioning Next.js paths is not detected as Next.js", async ({
+  page,
+}) => {
+  await page.goto(`/?site=${encodeURIComponent(`${FIXTURE}/plain`)}`);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "127.0.0.1",
+    { timeout: 15000 },
+  );
+  await expect(page.getByRole("button", { name: /^GitHub/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Next\.js/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^React/ })).toHaveCount(0);
+});
+
+test("landing form opens a live report", async ({ page }) => {
   await page.goto("/new");
   await expect(
     page.getByRole("heading", { name: "Put the web under a microscope." }),
   ).toBeVisible();
   await page
     .getByRole("textbox", { name: "Website URL" })
-    .fill("https://example.org/path");
-  await page.getByRole("button", { name: "Open sample", exact: true }).click();
-  await expect(page).toHaveURL(/site=example.org/, { timeout: 15000 });
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "example.org",
-  );
+    .fill(`${FIXTURE}/plain`);
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await expect(page).toHaveURL(/site=/);
   await expect(
-    page.getByText(/no live website scan has been performed/),
-  ).toBeVisible();
+    page.getByRole("heading", { level: 1, name: "127.0.0.1 Open 127.0.0.1" }),
+  ).toBeVisible({ timeout: 15000 });
 });
 
-test("keyboard navigation, dialog cancellation, and evidence are accessible", async ({
+test("scan failures explain the cause and allow recovery", async ({ page }) => {
+  await page.goto("/?site=10.0.0.1");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "10.0.0.1 is not a public internet address.",
+    { timeout: 15000 },
+  );
+  await expect(page.getByRole("button", { name: "Retry" })).toBeVisible();
+  await page.getByRole("button", { name: "View sample report" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Sample report" }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await analyze(page, `${FIXTURE}/file.json`);
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "not an HTML document",
+    {
+      timeout: 15000,
+    },
+  );
+});
+
+test("keyboard navigation, scan cancellation, and evidence are accessible", async ({
   page,
 }) => {
   await page.goto("/");
@@ -106,16 +146,51 @@ test("keyboard navigation, dialog cancellation, and evidence are accessible", as
   ).toBeVisible();
   await page.keyboard.press("ControlOrMeta+k");
   await expect(page.getByRole("dialog")).toBeVisible();
-  await page.getByRole("textbox", { name: "Website URL" }).fill("example.net");
-  await page.getByRole("button", { name: "Open sample", exact: true }).click();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toBeHidden();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "linear.app",
+  await page.keyboard.press("ControlOrMeta+k");
+  await page
+    .getByRole("textbox", { name: "Website URL" })
+    .fill(`${FIXTURE}/slow`);
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("status")).toContainText(
+    "Fetching the HTML document",
   );
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Sample report",
+  );
+  await expect(page).toHaveURL(/\/$/);
 });
 
-test("long domains and entry forms fit narrow viewports", async ({ page }) => {
+test("desktop and mobile layouts fit the viewport", async ({ page }) => {
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/");
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBeTruthy();
+    if (width === 390) {
+      await page.getByRole("button", { name: "Toggle navigation" }).click();
+      await page
+        .getByRole("button", { name: "New analysis", exact: true })
+        .first()
+        .click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await page.getByRole("button", { name: "Close new analysis" }).click();
+    }
+    await page.screenshot({
+      path: test.info().outputPath(`autopsy-${width}.png`),
+      fullPage: true,
+    });
+  }
+});
+
+test("long scan targets and entry forms fit narrow viewports", async ({
+  page,
+}) => {
   const domain = `${"a".repeat(60)}.${"b".repeat(60)}.example.com`;
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
@@ -133,9 +208,7 @@ test("long domains and entry forms fit narrow viewports", async ({ page }) => {
       ),
     ).toBeTruthy();
     await page.getByRole("textbox", { name: "Website URL" }).fill("invalid");
-    await page
-      .getByRole("button", { name: "Open sample", exact: true })
-      .click();
+    await page.getByRole("button", { name: "Analyze", exact: true }).click();
     await expect(
       page.getByText("Enter a valid website URL, such as example.com."),
     ).toBeVisible();
@@ -158,7 +231,9 @@ test("mobile navigation restores focus and reduced motion preserves readable evi
   await page.keyboard.press("Escape");
   await expect(toggle).toBeFocused();
   await expect(
-    page.getByRole("button", { name: "New analysis", exact: true }),
+    page
+      .getByRole("complementary", { name: "Report navigation" })
+      .getByRole("button", { name: "New analysis", exact: true }),
   ).toBeHidden();
   await page.getByRole("button", { name: /JavaScript payload/ }).click();
   await expect(

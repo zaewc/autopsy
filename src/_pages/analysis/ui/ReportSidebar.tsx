@@ -1,27 +1,31 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { Plus, X } from "lucide-react";
+import type { AnalysisReport } from "@/entities/analysis-report";
 import { BrandMark } from "@/shared/ui/brand-mark";
 import { REPORT_SECTIONS, type ReportSection } from "../config/reportSections";
 interface Props {
   sidebar: boolean;
   active: ReportSection;
-  history: string[];
-  findings: number;
+  history: readonly AnalysisReport[];
+  current: AnalysisReport | null;
+  /** Null while no report is shown. */
+  findings: number | null;
   onAnalyze: () => void;
   onClose: () => void;
   onSelect: (section: ReportSection) => void;
-  onDomain: (domain: string) => void;
+  onReport: (report: AnalysisReport) => void;
 }
 export function ReportSidebar({
   sidebar,
   active,
   history,
+  current,
   findings,
   onAnalyze,
   onClose,
   onSelect,
-  onDomain,
+  onReport,
 }: Props) {
   const asideRef = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -98,34 +102,44 @@ export function ReportSidebar({
           >
             <Icon size={16} />
             {name}
-            {name === "Findings" && <span className="count">{findings}</span>}
+            {name === "Findings" && findings !== null && (
+              <span className="count">{findings}</span>
+            )}
             {active === name && <span className="nav-dot" />}
           </button>
         ))}
       </nav>
-      <div className="recent">
-        <div className="nav-label">SAMPLE HISTORY</div>
-        {history.map((h) => (
-          <button
-            key={h}
-            onClick={() => {
-              onClose();
-              onDomain(h);
-              onSelect("Overview");
-            }}
-          >
-            <span className="history-domain" title={h}>
-              {h}
-            </span>
-            <span className="history-label">sample</span>
-          </button>
-        ))}
-      </div>
+      {history.length > 0 && (
+        <div className="recent">
+          <div className="nav-label">RECENT SCANS</div>
+          {history.map((report) => (
+            <button
+              key={report.url}
+              aria-current={current?.url === report.url ? "true" : undefined}
+              onClick={() => {
+                onClose();
+                onReport(report);
+              }}
+            >
+              <span className="history-domain" title={report.url}>
+                {report.domain}
+              </span>
+              {report.scannedAt && (
+                <span className="history-label">
+                  {new Date(report.scannedAt).toLocaleTimeString(undefined, {
+                    timeStyle: "short",
+                  })}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="sidebar-bottom">
         <p className="sidebar-note">
-          Sample workspace
+          Live scans read one HTML response.
           <br />
-          <span>No live scans are performed.</span>
+          <span>Scripts are not executed.</span>
         </p>
       </div>
     </aside>

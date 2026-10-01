@@ -3,14 +3,13 @@ import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnalysisForm } from "@/features/run-analysis";
-import type { AnalysisReport } from "@/entities/analysis-report";
+import { toSiteParam } from "@/shared/lib/web-url";
 import { BrandMark } from "@/shared/ui/brand-mark";
 import "./newAnalysis.css";
 export function NewAnalysisPage() {
   const router = useRouter();
-  const complete = useCallback(
-    (report: AnalysisReport) =>
-      router.push(`/?site=${encodeURIComponent(report.domain)}`),
+  const analyze = useCallback(
+    (url: URL) => router.push(`/?site=${encodeURIComponent(toSiteParam(url))}`),
     [router],
   );
   return (
@@ -20,11 +19,11 @@ export function NewAnalysisPage() {
           <BrandMark />
           autopsy
         </Link>
-        <Link href="/">Explore a sample report ↗</Link>
+        <Link href="/">View a sample report ↗</Link>
       </header>
       <main>
         <div className="analysis-modal">
-          <AnalysisForm onComplete={complete} />
+          <AnalysisForm onSubmit={analyze} />
         </div>
       </main>
     </div>

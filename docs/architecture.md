@@ -18,8 +18,8 @@ Server-only implementations must use separate `index.server.ts` APIs that import
 
 `_pages/analysis` owns the report workspace, its navigation, section selection, report export, and page-only sections. `_pages/new-analysis` owns the standalone entry experience. Neither page imports the other.
 
-`features/run-analysis` owns URL-entry state, the cancellable scan lifecycle, and the server-side `scanWebsite` action that fetches one public document and builds a live report. `GET /api/scan?url=` exposes it through `_app/api`. Both pages consume its `AnalysisForm` public API and receive completion through a callback; the feature never imports a router or a page.
+`features/run-analysis` owns the URL form, the client scan lifecycle (`useWebsiteScan`, which calls `/api/scan` and aborts on cancel), and the server-side `scanWebsite` action that fetches one public document and builds a live report. `GET /api/scan?url=` exposes it through `_app/api`. Both pages consume its `AnalysisForm` public API and receive the validated URL through a callback; the report page runs the scan, and the feature never imports a router or a page.
 
-`entities/analysis-report` owns the report contract, sample fixtures, and the architecture evidence visualization. The domain is consumed by both the feature and report page. Generic URL normalization and native dialog behavior live in module-level Shared APIs.
+`entities/analysis-report` owns the report contract, technology detection, document audit, the sample fixture, and the architecture evidence visualization. The domain is consumed by both the feature and report page. Generic URL normalization and native dialog behavior live in module-level Shared APIs.
 
 Component styles are colocated with their owning UI modules. `_app/styles` contains only global foundations and design primitives. The Widgets layer is intentionally absent: no composed widget is shared by these two screens. Report export remains page-local because only the report page owns that action.

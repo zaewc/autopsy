@@ -10,6 +10,7 @@ import {
   ArrowRight,
   X,
 } from "lucide-react";
+import type { AnalysisReport } from "@/entities/analysis-report";
 import { AnalysisForm } from "@/features/run-analysis";
 import { Dialog } from "@/shared/ui/dialog";
 import { useReportWorkspace } from "../model/useReportWorkspace";
@@ -17,23 +18,40 @@ import { ReportSidebar } from "./ReportSidebar";
 import { ReportSummary } from "./ReportSummary";
 import { ReportTabs } from "./ReportTabs";
 import { ReportFooter } from "./ReportFooter";
+import { ScanStatus } from "./ScanStatus";
 import { TechnologySection } from "./TechnologySection";
 import { PerformanceSection } from "./PerformanceSection";
 import { ArchitectureSection } from "./ArchitectureSection";
 import { FindingsSection } from "./FindingsSection";
 import { AuditSection } from "./AuditSection";
 import "./analysisWorkspace.css";
+
+function scanDescription(report: AnalysisReport) {
+  const scanned = report.scannedAt
+    ? new Date(report.scannedAt).toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : "";
+  const parts = [`Scanned ${scanned}`, `HTTP ${report.document?.status}`];
+  if (report.url !== `https://${report.domain}/`) parts.push(report.url);
+  return parts.join(" · ");
+}
+
 export function AnalysisWorkspace({
-  initialDomain,
+  initialSite,
 }: {
-  initialDomain: string;
+  initialSite: string | null;
 }) {
   const {
     active,
     setActive,
-    domain,
-    setDomain,
     report,
+    show,
+    scan,
+    analyze,
+    retry,
+    cancelScan,
     modal,
     setModal,
     sidebar,
@@ -42,11 +60,17 @@ export function AnalysisWorkspace({
     copied,
     error,
     setError,
-    completeScan,
     copy,
     download,
-  } = useReportWorkspace(initialDomain);
+  } = useReportWorkspace(initialSite);
   const overview = active === "Overview";
+  const live = report.mode === "live";
+  const title =
+    scan.status === "idle"
+      ? live
+        ? report.domain
+        : "Sample report"
+      : scan.target;
   return (
     <div className="app-shell">
       {sidebar && (
@@ -60,14 +84,15 @@ export function AnalysisWorkspace({
         sidebar={sidebar}
         active={active}
         history={history}
-        findings={report.findings.length}
+        current={scan.status === "idle" ? report : null}
+        findings={scan.status === "idle" ? report.findings.length : null}
         onAnalyze={() => {
           setModal(true);
           setSidebar(false);
         }}
         onClose={() => setSidebar(false)}
         onSelect={setActive}
-        onDomain={setDomain}
+        onReport={show}
       />
       <div className="workspace" inert={sidebar}>
         <header className="topbar">
@@ -84,87 +109,130 @@ export function AnalysisWorkspace({
             <span className="breadcrumb">Workspace</span>
             <ChevronRight size={13} />
             <Globe size={13} />
-            <span>{domain}</span>
+            <span className="topbar-title">{title}</span>
           </div>
-          <div>
-            <button
-              className="icon-button"
-              aria-label="Copy report JSON"
-              onClick={() => void copy()}
-            >
-              {copied ? <Check size={16} /> : <Copy size={16} />}
-            </button>
-          </div>
+          {scan.status === "idle" && (
+            <div>
+              <button
+                className="icon-button"
+                aria-label="Copy report JSON"
+                onClick={() => void copy()}
+              >
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+              </button>
+            </div>
+          )}
         </header>
         <main>
-          <div className="eyebrow">Website report</div>
-          <div className="report-heading">
-            <div>
-              <h1>
-                <span className="domain-title">{domain}</span>
-                <a
-                  href={`https://${domain}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={`Open ${domain}`}
-                >
-                  <ArrowUpRight size={22} />
-                </a>
-              </h1>
-              <p>Technology, resource timings, and findings</p>
-            </div>
-            <div className="report-actions">
-              <button
-                className="secondary-button"
-                onClick={() => setModal(true)}
-              >
-                New sample
-                <ArrowRight size={14} />
-              </button>
-              <button className="secondary-button" onClick={download}>
-                <Download size={14} />
-                Export report
-              </button>
-            </div>
-          </div>
-          <div className="sample-note">
-            <strong>Sample report.</strong> These values illustrate a report
-            layout; no live website scan has been performed.
-          </div>
-          <ReportSummary
-            report={report}
-            onFindings={() => setActive("Findings")}
-          />
-          <ReportTabs active={active} onSelect={setActive} />
-          <div
-            id="report-panel"
-            role="tabpanel"
-            aria-labelledby={`tab-${active}`}
-            tabIndex={0}
-            key={domain}
-          >
-            {(overview || active === "Technology") && (
-              <TechnologySection technologies={report.technologies} />
-            )}
-            {(overview || active === "Performance" || active === "Network") && (
-              <PerformanceSection network={active === "Network"} />
-            )}
-            {(overview || active === "Architecture") && (
-              <ArchitectureSection details={active === "Architecture"} />
-            )}
-            {(overview || active === "Findings") && (
-              <FindingsSection findings={report.findings} />
-            )}
-            {(active === "Security" ||
-              active === "Accessibility" ||
-              active === "SEO") && (
-              <AuditSection
-                area={active}
-                checks={report.checks}
-                caption="Sample checks"
+          {scan.status !== "idle" ? (
+            <ScanStatus
+              scan={scan}
+              onCancel={cancelScan}
+              onRetry={() => void retry(scan.target)}
+              onNew={() => setModal(true)}
+              backLabel={live ? "Back to report" : "View sample report"}
+            />
+          ) : (
+            <>
+              <div className="eyebrow">
+                {live ? "Website report" : "Sample report"}
+              </div>
+              <div className="report-heading">
+                <div>
+                  <h1>
+                    <span className="domain-title">{title}</span>
+                    {live && (
+                      <a
+                        href={report.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Open ${report.domain}`}
+                      >
+                        <ArrowUpRight size={22} />
+                      </a>
+                    )}
+                  </h1>
+                  <p>
+                    {live
+                      ? scanDescription(report)
+                      : "Illustrative values for exploring the report layout"}
+                  </p>
+                </div>
+                <div className="report-actions">
+                  <button
+                    className="secondary-button"
+                    onClick={() => setModal(true)}
+                  >
+                    New analysis
+                    <ArrowRight size={14} />
+                  </button>
+                  <button className="secondary-button" onClick={download}>
+                    <Download size={14} />
+                    Export report
+                  </button>
+                </div>
+              </div>
+              <div className="report-note">
+                {live ? (
+                  <>
+                    <strong>Live scan.</strong> {report.notice}
+                  </>
+                ) : (
+                  <>
+                    <strong>Sample report.</strong> These values illustrate a
+                    report layout and do not describe any real website.
+                  </>
+                )}
+              </div>
+              <ReportSummary
+                report={report}
+                onFindings={() => setActive("Findings")}
               />
-            )}
-          </div>
+              <ReportTabs active={active} onSelect={setActive} />
+              <div
+                id="report-panel"
+                role="tabpanel"
+                aria-labelledby={`tab-${active}`}
+                tabIndex={0}
+                key={report.url || report.domain}
+              >
+                {(overview || active === "Technology") && (
+                  <TechnologySection
+                    technologies={report.technologies}
+                    live={live}
+                  />
+                )}
+                {(overview ||
+                  active === "Performance" ||
+                  active === "Network") && (
+                  <PerformanceSection
+                    network={active === "Network"}
+                    live={live}
+                  />
+                )}
+                {(overview || active === "Architecture") && (
+                  <ArchitectureSection
+                    details={active === "Architecture"}
+                    live={live}
+                  />
+                )}
+                {(overview || active === "Findings") && (
+                  <FindingsSection findings={report.findings} />
+                )}
+                {(active === "Security" ||
+                  active === "Accessibility" ||
+                  active === "SEO") && (
+                  <AuditSection
+                    area={active}
+                    checks={report.checks}
+                    caption={
+                      live ? "Checked in the HTML response" : "Sample checks"
+                    }
+                  />
+                )}
+              </div>
+            </>
+          )}
           <ReportFooter />
         </main>
       </div>
@@ -175,7 +243,7 @@ export function AnalysisWorkspace({
           onClose={() => setModal(false)}
           className="analysis-modal"
         >
-          <AnalysisForm onComplete={completeScan} />
+          <AnalysisForm onSubmit={analyze} />
         </Dialog>
       )}
       {error && (

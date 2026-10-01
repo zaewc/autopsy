@@ -1,22 +1,66 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createSampleReport,
   type AnalysisReport,
 } from "@/entities/analysis-report";
+import { useWebsiteScan } from "@/features/run-analysis";
+import { normalizeHttpUrl, toSiteParam } from "@/shared/lib/web-url";
 import type { ReportSection } from "../config/reportSections";
-export function useReportWorkspace(initialDomain: string) {
+
+function siteHref(report: AnalysisReport) {
+  const url = report.mode === "live" && normalizeHttpUrl(report.url);
+  return url ? `/?site=${encodeURIComponent(toSiteParam(url))}` : "/";
+}
+
+export function useReportWorkspace(initialSite: string | null) {
   const [active, setActive] = useState<ReportSection>("Overview");
-  const [domain, setDomain] = useState(initialDomain);
+  const [report, setReport] = useState<AnalysisReport>(createSampleReport);
   const [modal, setModal] = useState(false);
   const [sidebar, setSidebar] = useState(false);
-  const [history, setHistory] = useState(() =>
-    Array.from(new Set([initialDomain, "vercel.com", "github.com"])),
-  );
+  const [history, setHistory] = useState<AnalysisReport[]>([]);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const report = useMemo(() => createSampleReport(domain), [domain]);
+  const show = useCallback((next: AnalysisReport) => {
+    setReport(next);
+    setActive("Overview");
+    window.history.replaceState(null, "", siteHref(next));
+  }, []);
+  const completeScan = useCallback(
+    (next: AnalysisReport) => {
+      show(next);
+      setHistory((old) =>
+        [next, ...old.filter((item) => item.url !== next.url)].slice(0, 5),
+      );
+    },
+    [show],
+  );
+  const {
+    state: scan,
+    scan: startScan,
+    cancel,
+  } = useWebsiteScan(completeScan, initialSite);
+  const analyze = useCallback(
+    (url: URL) => {
+      setModal(false);
+      const site = toSiteParam(url);
+      window.history.replaceState(
+        null,
+        "",
+        `/?site=${encodeURIComponent(site)}`,
+      );
+      void startScan(site);
+    },
+    [startScan],
+  );
+  const cancelScan = useCallback(() => {
+    cancel();
+    window.history.replaceState(null, "", siteHref(report));
+  }, [cancel, report]);
+  useEffect(() => {
+    if (initialSite) void startScan(initialSite);
+  }, [initialSite, startScan]);
   useEffect(() => {
     function key(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
@@ -39,14 +83,6 @@ export function useReportWorkspace(initialDomain: string) {
     viewport.addEventListener("change", closeDesktopNavigation);
     return () => viewport.removeEventListener("change", closeDesktopNavigation);
   }, []);
-  const completeScan = useCallback((next: AnalysisReport) => {
-    setDomain(next.domain);
-    setHistory((old) =>
-      [next.domain, ...old.filter((item) => item !== next.domain)].slice(0, 5),
-    );
-    setActive("Overview");
-    setModal(false);
-  }, []);
   async function copy() {
     try {
       await navigator.clipboard.writeText(JSON.stringify(report, null, 2));
@@ -63,7 +99,7 @@ export function useReportWorkspace(initialDomain: string) {
     );
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `autopsy-${domain}.json`;
+    anchor.download = `autopsy-${report.domain}.json`;
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
@@ -72,9 +108,12 @@ export function useReportWorkspace(initialDomain: string) {
   return {
     active,
     setActive,
-    domain,
-    setDomain,
     report,
+    show,
+    scan,
+    analyze,
+    retry: startScan,
+    cancelScan,
     modal,
     setModal,
     sidebar,
@@ -83,7 +122,6 @@ export function useReportWorkspace(initialDomain: string) {
     copied,
     error,
     setError,
-    completeScan,
     copy,
     download,
   };

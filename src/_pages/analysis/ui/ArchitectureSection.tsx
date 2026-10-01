@@ -2,9 +2,21 @@ import { SectionHeading } from "@/shared/ui/section-heading";
 import { ArchitectureDiagram } from "@/entities/analysis-report";
 export function ArchitectureSection({
   details = false,
+  live,
 }: {
   details?: boolean;
+  live: boolean;
 }) {
+  if (live)
+    return (
+      <section>
+        <SectionHeading title="Architecture signals" />
+        <p className="empty-note">
+          The architecture view is only drawn for the sample report. For this
+          scan, hosting and CDN signals are listed under Technology.
+        </p>
+      </section>
+    );
   return (
     <section>
       <SectionHeading title="Architecture signals">

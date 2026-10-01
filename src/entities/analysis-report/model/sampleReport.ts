@@ -140,11 +140,12 @@ export const SAMPLE_CHECKS: readonly AuditCheck[] = [
   ),
 ];
 
-export function createSampleReport(domain: string): AnalysisReport {
+/** Illustrative report that is not attributed to any real website. */
+export function createSampleReport(): AnalysisReport {
   return {
-    domain,
+    domain: "sample",
     mode: "sample",
-    url: `https://${domain}/`,
+    url: "",
     scannedAt: null,
     notice: "Illustrative sample; no live website scan performed.",
     technologies: SAMPLE_TECHNOLOGIES,
