@@ -39,7 +39,7 @@ npm run check
 npm run build
 ```
 
-`check` runs TypeScript, ESLint, Steiger, the additional import-boundary checker, and its negative-fixture tests. There are no artificial widget slices or same-layer cross-import exceptions.
+`check` runs TypeScript, ESLint, Steiger, the additional import-boundary checker, its negative-fixture tests, and Vitest unit tests (`npm run test:unit`). There are no artificial widget slices or same-layer cross-import exceptions.
 
 ## Browser regression tests
 
