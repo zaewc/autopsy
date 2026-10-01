@@ -143,6 +143,7 @@ export async function startPublicProxy({
       new Promise<void>((resolve) => {
         for (const socket of sockets) socket.destroy();
         server.close(() => resolve());
+        server.closeAllConnections();
       }),
   };
 }
