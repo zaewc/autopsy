@@ -10,7 +10,10 @@
     "lint": "eslint src app scripts eslint.config.mjs steiger.config.ts --max-warnings 0",
     "lint:arch": "steiger ./src && node scripts/checkArchitecture.mjs",
     "test:arch": "node --test scripts/checkArchitecture.test.mjs",
-    "check": "npm run typecheck && npm run lint && npm run lint:arch && npm run test:arch"
+    "check": "npm run typecheck && npm run lint && npm run lint:arch && npm run test:arch",
+    "test:e2e": "playwright test",
+    "format:check": "prettier --check src app scripts tests docs .github *.ts *.mjs *.json *.md",
+    "test:all": "npm run check && npm run format:check && npm run test:e2e"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
