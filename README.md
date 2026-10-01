@@ -40,3 +40,12 @@ npm run build
 ```
 
 `check` runs TypeScript, ESLint, Steiger, the additional import-boundary checker, and its negative-fixture tests. There are no artificial widget slices or same-layer cross-import exceptions.
+
+## Browser regression tests
+
+```sh
+npx playwright install chrome
+npm run test:all
+```
+
+Local tests use Chrome; CI installs Playwright Chromium. The harness builds and starts a production server on port 3100, with `.next-e2e` isolated from normal `.next` output. It covers report navigation, URL errors, staged scan completion, scan cancellation, evidence expansion, export, keyboard navigation, and desktop/mobile viewport fit. GitHub Actions runs these checks for every PR and push to `main`.
