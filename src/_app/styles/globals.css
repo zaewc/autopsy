@@ -1,13 +1,21 @@
 @import "tailwindcss";
 :root {
-  --bg: #101112;
-  --panel: #151617;
-  --line: #282a2c;
-  --text: #e8e9e9;
-  --muted: #81858a;
-  --green: #9fcca9;
-  --amber: #d4b578;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --bg: #121514;
+  --panel: #191d1b;
+  --hover: #222925;
+  --line: #343c37;
+  --text: #edf0ec;
+  --muted: #a5afa8;
+  --green: #b6d3ac;
+  --amber: #e0bf85;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  color-scheme: dark;
 }
 * {
   box-sizing: border-box;
@@ -16,8 +24,9 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 13px;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 button,
@@ -26,122 +35,82 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 button,
+input {
+  font: inherit;
+}
+button,
 a {
   color: inherit;
 }
 button {
-  font: inherit;
   cursor: pointer;
-}
-button {
   background: none;
   border: 0;
+  transition:
+    background 0.16s ease-out,
+    color 0.16s ease-out;
 }
 a {
   text-decoration: none;
 }
-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-  outline: 2px solid var(--green);
-  outline-offset: 4px;
-}
-button {
-  transition:
-    background 0.16s,
-    color 0.16s,
-    border-color 0.16s;
-}
 button:hover {
-  color: #fff;
+  background: var(--hover);
+}
+button:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 svg {
   flex-shrink: 0;
 }
-button:disabled {
-  cursor: wait;
-  opacity: 0.6;
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
 }
 kbd {
-  font: 10px var(--mono);
+  font: 12px var(--mono);
+  color: var(--muted);
   margin-left: auto;
-  color: #8a8d90;
-}
-.pulse,
-.green-dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  background: var(--green);
-  border-radius: 50%;
-  flex-shrink: 0;
 }
 .icon-button {
   display: grid;
   place-items: center;
-  padding: 6px;
+  width: 40px;
+  height: 40px;
   border-radius: 4px;
-}
-.icon-button:hover {
-  background: #282b2b;
+  flex-shrink: 0;
 }
 .eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font: 9px var(--mono);
-  letter-spacing: 1.5px;
-  color: #949a9b;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.06em;
 }
 .secondary-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  border: 1px solid #373a3b;
-  padding: 9px 12px;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 10px 14px;
+  min-height: 44px;
+  border: 1px solid #49534b;
   border-radius: 4px;
-  font-size: 11px;
-  background: #1b1d1e;
-}
-.secondary-button:hover {
-  background: #282c29;
+  background: var(--panel);
+  white-space: nowrap;
+  font-size: 13px;
 }
 .amber {
   color: var(--amber);
 }
-.scan-stamp .green-dot {
-  margin-right: 7px;
-}
-.muted-caption {
-  font-size: 9px;
-  color: #757d81;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.tiny-dot {
-  color: #52585b;
-}
 .green-text {
   color: var(--green);
 }
-@media (max-width: 700px) {
-  .secondary-button {
-    font-size: 9px;
-    padding: 9px;
-  }
-  .muted-caption {
-    font-size: 8px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
+.muted-caption {
+  font-size: 12px;
+  color: var(--muted);
 }
 .sr-only {
   position: absolute;
@@ -152,5 +121,20 @@ kbd {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
-  border-width: 0;
+  border: 0;
+}
+@media (max-width: 700px) {
+  .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }

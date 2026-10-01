@@ -1,220 +1,215 @@
 .analysis-modal {
-  width: 100%;
-  max-width: 650px;
-  background: #121614;
-  border: 1px solid #3a473e;
-  padding: 45px;
-  border-radius: 8px;
-  box-shadow: 0 30px 100px #0008;
   position: relative;
-  animation: appear 0.2s ease;
-}
-.analysis-content > .eyebrow {
-  margin-top: 29px;
-  font-size: 8px;
-  color: #a2b9a8;
-}
-.analysis-modal h2 {
-  font-size: 45px;
-  font-weight: 400;
-  letter-spacing: -1.9px;
-  line-height: 1.12;
-  margin: 17px 0;
-}
-.analysis-content > p {
-  color: #97a39b;
-  font-size: 13px;
-  line-height: 1.8;
-}
-.analysis-modal form {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 30px;
-  background: #1d2520;
-  border: 1px solid #566e5b;
-  border-radius: 5px;
-  padding: 7px 7px 7px 14px;
-  color: #9bb0a1;
-}
-.analysis-modal input {
-  background: transparent;
-  min-width: 0;
-  flex: 1;
-  color: #dfe7e1;
-  border: 0;
-  font: 12px var(--mono);
-  padding: 8px 0;
-  outline: none;
-}
-.analysis-modal form button {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  background: #bdd5b9;
-  color: #162119;
-  border-radius: 3px;
-  padding: 12px 15px;
-  font-size: 11px;
-  font-weight: 600;
-}
-.try-example {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 10px;
-  color: #697c6f;
-  margin-top: 15px;
-}
-.try-example button {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  color: #a2b4a7;
-}
-.analysis-modal .architecture {
-  padding: 20px 10px;
-  gap: 17px;
-  margin-top: 35px;
-}
-.analysis-modal .node {
-  padding: 11px 7px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-}
-.analysis-modal .node strong {
-  font-size: 9px;
-}
-.analysis-modal .node small {
-  font-size: 6px;
-  margin-top: 0;
-}
-.analysis-modal .node-arrow {
-  right: -16px;
-  width: 12px;
-}
-.modal-foot {
-  display: flex;
-  gap: 7px;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  color: #75867b;
-  margin-top: 24px;
-}
-.scan-progress {
-  margin-top: 25px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px;
-}
-.scan-progress > div:not(.scan-track) {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font: 7px var(--mono);
-  color: #59675d;
-}
-.scan-progress > div.done {
-  color: #c0d9bc;
-}
-.scan-progress > div > span {
-  width: 17px;
-  height: 17px;
-  border: 1px solid currentColor;
-  display: grid;
-  place-items: center;
-  border-radius: 3px;
-}
-.scan-track {
-  height: 2px;
-  background: #2a342b;
   width: 100%;
-  margin-top: 10px;
-}
-.scan-track i {
-  display: block;
-  height: 100%;
-  background: #bdd5b9;
-  transition: width 0.7s ease;
-}
-.scan-progress p {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #95b39c;
-  font: 10px var(--mono);
-  margin-top: 8px;
-}
-.form-error {
-  color: #dfb07f !important;
-  font-size: 11px !important;
-}
-@keyframes appear {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@media (max-width: 700px) {
-  .analysis-modal {
-    padding: 30px 20px;
-  }
-  .analysis-modal h2 {
-    font-size: 36px;
-  }
-  .analysis-content > p {
-    font-size: 11px;
-  }
-  .analysis-modal form {
-    gap: 7px;
-    padding-left: 10px;
-  }
-  .analysis-modal input {
-    font-size: 10px;
-  }
-  .analysis-modal form button {
-    padding: 11px 10px;
-    font-size: 10px;
-  }
-  .try-example {
-    font-size: 9px;
-    gap: 9px;
-  }
-  .modal-foot {
-    font-size: 8px;
-  }
-  .scan-progress > div:not(.scan-track) {
-    font-size: 6px;
-    gap: 3px;
-  }
-  .scan-progress > div > span {
-    width: 13px;
-    height: 13px;
-  }
-  .scan-progress {
-    gap: 4px;
-  }
-  .analysis-modal .architecture {
-    gap: 13px;
-  }
-  .analysis-modal .node strong {
-    font-size: 8px;
-  }
+  max-width: 720px;
+  padding: 40px;
+  background: var(--bg);
+  border: 1px solid #4c584d;
+  border-radius: 6px;
 }
 .analysis-content {
   min-width: 0;
 }
-.scan-track i {
+.analysis-content > .eyebrow {
+  margin-top: 0;
+  color: var(--green);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+.analysis-modal h2 {
+  font-size: clamp(32px, 3.5vw, 46px);
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  margin: var(--space-4) 0 20px;
+}
+.analysis-content > p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--muted);
+  max-width: 54ch;
+  margin: 0;
+}
+.analysis-modal form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: 28px;
+  border: 1px solid #7f9472;
+  border-radius: 4px;
+  background: var(--panel);
+  padding: 6px 6px 6px var(--space-4);
+  color: var(--muted);
+}
+
+.analysis-modal input {
+  background: transparent;
+  border: 0;
+  min-width: 0;
+  flex: 1;
+  color: var(--text);
+  font: 14px var(--mono);
+  padding: var(--space-3) 0;
+}
+.analysis-modal input::placeholder {
+  color: #a5afa8;
+}
+.analysis-modal form button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: var(--green);
+  color: #162014;
+  border-radius: 3px;
+  padding: var(--space-3) var(--space-4);
+  min-height: 44px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.analysis-modal form button:hover {
+  background: #c6dfbd;
+}
+.try-example {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-3);
+  color: var(--muted);
+  font-size: 12px;
+}
+.try-example button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 44px;
+  color: var(--text);
+  font-size: 12px;
+}
+.analysis-content .architecture {
+  margin-top: var(--space-6);
+}
+.analysis-content .node {
+  grid-template-columns: 1fr;
+  padding: var(--space-3);
+  gap: 2px;
+  justify-items: start;
+}
+.analysis-content .node-icon {
+  display: none;
+}
+.analysis-content .node strong {
+  font-size: 12px;
+}
+.analysis-content .node small {
+  font-size: 11px;
+}
+.modal-foot {
+  margin-top: var(--space-4);
+  color: var(--muted);
+  font-size: 12px;
+}
+.scan-progress {
+  margin-top: var(--space-6);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.scan-progress > div:not(.scan-track) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.scan-progress > div.done {
+  color: var(--green);
+}
+.scan-progress > div > span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  font: 11px var(--mono);
+}
+.scan-track {
   width: 100%;
+  height: 2px;
+  background: var(--line);
+}
+.scan-track i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--green);
   transform-origin: left;
   transition: transform 0.2s ease-out;
+}
+.scan-progress p {
+  width: 100%;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}
+.analysis-content > .form-error {
+  color: #edc48f;
+  font-size: 13px;
+  margin-top: var(--space-3);
+}
+@media (max-width: 600px) {
+  .analysis-modal {
+    padding: var(--space-8) 20px var(--space-6);
+  }
+  .analysis-modal h2 {
+    font-size: 34px;
+  }
+  .analysis-content > p {
+    font-size: 14px;
+  }
+  .analysis-modal form {
+    flex-wrap: wrap;
+    padding: var(--space-3);
+    gap: var(--space-2);
+  }
+  .analysis-modal form > svg {
+    display: none;
+  }
+  .analysis-modal input {
+    flex-basis: 100%;
+    padding: var(--space-2) var(--space-1);
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .analysis-modal form button {
+    width: 100%;
+    min-height: 44px;
+    font-size: 14px;
+  }
+  .analysis-content .node {
+    grid-template-columns: 1fr auto;
+    padding: 14px;
+    min-height: 52px;
+  }
+  .analysis-content .node strong {
+    font-size: 13px;
+  }
+  .analysis-content .node small {
+    margin-top: 0;
+  }
+  .try-example {
+    gap: var(--space-1) var(--space-4);
+  }
+  .scan-progress > div:not(.scan-track) {
+    font-size: 11px;
+    gap: var(--space-1);
+  }
+  .scan-progress {
+    gap: 10px;
+  }
+  .scan-progress p {
+    font-size: 12px;
+  }
 }

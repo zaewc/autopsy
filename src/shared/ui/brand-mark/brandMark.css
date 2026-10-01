@@ -33,20 +33,12 @@
   height: 5px;
   width: 5px;
 }
-.beta {
-  font: 8px var(--mono);
-  border: 1px solid #3a3c3c;
-  padding: 3px 4px;
-  letter-spacing: 0.5px;
-  color: #969a9b;
-  margin-left: 1px;
-}
-@media (max-width: 960px) {
+@media (max-width: 600px) {
   .brand {
-    font-size: 22px;
-    gap: 7px;
+    font-size: 24px;
+    padding-left: 0;
   }
-  .beta {
-    font-size: 7px;
-  }
+}
+.brand {
+  min-height: 44px;
 }

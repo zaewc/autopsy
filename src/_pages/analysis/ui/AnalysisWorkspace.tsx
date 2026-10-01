@@ -48,6 +48,13 @@ export function AnalysisWorkspace({
   const overview = active === "Overview";
   return (
     <div className="app-shell">
+      {sidebar && (
+        <button
+          className="mobile-nav-backdrop"
+          aria-label="Close navigation"
+          onClick={() => setSidebar(false)}
+        />
+      )}
       <ReportSidebar
         sidebar={sidebar}
         active={active}
@@ -60,12 +67,14 @@ export function AnalysisWorkspace({
         onSelect={setActive}
         onDomain={setDomain}
       />
-      <div className="workspace">
+      <div className="workspace" inert={sidebar}>
         <header className="topbar">
           <div>
             <button
               className="icon-button mobile-menu"
               aria-label="Toggle navigation"
+              aria-expanded={sidebar}
+              aria-controls="report-navigation"
               onClick={() => setSidebar(!sidebar)}
             >
               <PanelLeftClose size={17} />
@@ -90,7 +99,7 @@ export function AnalysisWorkspace({
           <div className="report-heading">
             <div>
               <h1>
-                {domain}
+                <span className="domain-title">{domain}</span>
                 <a
                   href={`https://${domain}`}
                   target="_blank"
@@ -102,16 +111,19 @@ export function AnalysisWorkspace({
               </h1>
               <p>Technology, resource timings, and findings</p>
             </div>
-            <button className="secondary-button" onClick={download}>
-              <Download size={14} />
-              Export report
-            </button>
-          </div>
-          <div className="report-meta">
-            <button onClick={() => setModal(true)}>
-              Analyze another website
-              <ArrowRight size={13} />
-            </button>
+            <div className="report-actions">
+              <button
+                className="secondary-button"
+                onClick={() => setModal(true)}
+              >
+                New sample
+                <ArrowRight size={14} />
+              </button>
+              <button className="secondary-button" onClick={download}>
+                <Download size={14} />
+                Export report
+              </button>
+            </div>
           </div>
           <div className="sample-note">
             <strong>Sample report.</strong> These values illustrate a report

@@ -18,7 +18,7 @@ npm run typecheck
 
 ## Scope
 
-This is an interactive frontend prototype. All report values, technology detections, timings, confidence levels, and findings are illustrative sample data. Entering a URL runs a staged demonstration and labels the sample report with that hostname; it does not fetch or analyze that website. Recent reports are held in memory for the current session. JSON exports preserve the sample-data designation.
+This is an interactive frontend prototype. All report values, technology examples, timings, and findings are illustrative sample data. Entering a URL runs a staged demonstration and labels the sample report with that hostname; it does not fetch or analyze that website. Recent reports are held in memory for the current session. JSON exports preserve the sample-data designation.
 
 The interface includes nine report views, expandable evidence, finding filters, resource timing charts, an observed/inferred architecture diagram, report copy/download, URL validation, responsive navigation, and reduced-motion support. Charts are native CSS/SVG and require no charting dependency.
 
@@ -29,7 +29,7 @@ A production implementation needs a separate isolated browser scanning service, 
 Use Node 24 (`nvm use`). Routes are thin re-exports; product code follows Feature-Sliced Design under `src`. See [architecture decisions](docs/architecture.md) and [contributor rules](AGENTS.md).
 
 - `/`: interactive sample report.
-- `/new`: URL entry and staged sample analysis, sharing `features/run-analysis` with the report dialog.
+- `/new`: URL entry and sample report preparation, sharing `features/run-analysis` with the report dialog.
 - `entities/analysis-report`: report types, illustrative fixtures, and architecture evidence visualization.
 - `_pages/analysis`: report composition, navigation, section state, and export actions.
 - `shared`: domain-independent URL normalization and reusable UI primitives.
@@ -48,4 +48,4 @@ npx playwright install chrome
 npm run test:all
 ```
 
-Local tests use Chrome; CI installs Playwright Chromium. The harness builds and starts a production server on port 3100, with `.next-e2e` isolated from normal `.next` output. It covers report navigation, URL errors, staged scan completion, scan cancellation, evidence expansion, export, keyboard navigation, and desktop/mobile viewport fit. GitHub Actions runs these checks for every PR and push to `main`.
+Local tests use Chrome; CI installs Playwright Chromium. The harness builds and starts a production server on port 3100, with `.next-e2e` isolated from normal `.next` output. It covers report navigation, URL errors, sample preparation, cancellation, evidence expansion, export, keyboard navigation, and desktop/mobile viewport fit. GitHub Actions runs these checks for every PR and push to `main`.
