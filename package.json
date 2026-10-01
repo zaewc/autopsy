@@ -7,19 +7,21 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src app scripts eslint.config.mjs steiger.config.ts --max-warnings 0",
+    "lint": "eslint src app scripts eslint.config.mjs steiger.config.ts vitest.config.mts --max-warnings 0",
     "lint:arch": "steiger ./src && node scripts/checkArchitecture.mjs",
     "test:arch": "node --test scripts/checkArchitecture.test.mjs",
-    "check": "npm run typecheck && npm run lint && npm run lint:arch && npm run test:arch",
+    "check": "npm run typecheck && npm run lint && npm run lint:arch && npm run test:arch && npm run test:unit",
     "test:e2e": "playwright test",
-    "format:check": "prettier --check src app scripts tests docs .github *.ts *.mjs *.json *.md",
-    "test:all": "npm run check && npm run format:check && npm run test:e2e"
+    "format:check": "prettier --check src app scripts tests docs .github *.ts *.mjs *.mts *.json *.md",
+    "test:all": "npm run check && npm run format:check && npm run test:e2e",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
     "next": "^15.5.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@feature-sliced/steiger-plugin": "^0.7.0",
@@ -34,7 +36,8 @@
     "steiger": "^0.6.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0",
-    "typescript-eslint": "^8.71.0"
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^5.0.3"
   },
   "overrides": {
     "postcss": "^8.5.28"
