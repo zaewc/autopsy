@@ -26,6 +26,18 @@ const VALID = {
 };
 test("downward imports and route adapters pass", () =>
   assert.deepEqual(inspect(VALID), []));
+const SERVER = {
+  "app/api/report/route.ts": "export { GET } from '@/_app/api/index.server';",
+  "src/_app/api/index.server.ts":
+    "import 'server-only'; export { GET } from './report';",
+  "src/_app/api/report.ts":
+    "import { load } from '@/entities/report/index.server'; export const GET = load;",
+  "src/entities/report/index.server.ts":
+    "import 'server-only'; export { load } from './api/load';",
+  "src/entities/report/api/load.ts": "export const load = () => null;",
+};
+test("server public APIs and server route adapters pass", () =>
+  assert.deepEqual(inspect({ ...VALID, ...SERVER }), []));
 for (const [name, file, code, pattern] of [
   [
     "upward dependency",
@@ -82,6 +94,24 @@ for (const [name, file, code, pattern] of [
     /bypasses/,
   ],
   [
+    "server API without server-only",
+    "src/entities/report/index.server.ts",
+    "export { item } from './model/item';",
+    /must import "server-only"/,
+  ],
+  [
+    "client import of a server API",
+    "src/_pages/home/ui/Page.tsx",
+    "'use client'; import { load } from '@/entities/report/index.server'; export const Page = load;",
+    /Client modules must not import/,
+  ],
+  [
+    "server module deep import",
+    "src/_pages/home/ui/Page.tsx",
+    "import { load } from '@/entities/report/api/load'; export const Page = load;",
+    /bypasses/,
+  ],
+  [
     "relative cycle",
     "src/entities/report/model/item.ts",
     "import { item as x } from '../index'; export const item = x;",
@@ -89,4 +119,7 @@ for (const [name, file, code, pattern] of [
   ],
 ])
   test(`rejects ${name}`, () =>
-    assert.match(inspect({ ...VALID, [file]: code }).join("\n"), pattern));
+    assert.match(
+      inspect({ ...VALID, ...SERVER, [file]: code }).join("\n"),
+      pattern,
+    ));

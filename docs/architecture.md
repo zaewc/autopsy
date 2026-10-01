@@ -12,7 +12,7 @@ Single-page blocks stay in that page's `ui`; page-specific state stays in its `m
 
 Steiger applies its recommended FSD rules. Three narrowly documented compatibility settings follow Patchwork: prefixed Next.js layer names, App segments, and module-level Shared APIs. `scripts/checkArchitecture.mjs` independently enforces layer order (including the prefixed names), same-layer isolation, public API access, explicit route adapters, and cycles. Its negative-fixture tests ensure violations are rejected, including dynamic and type imports. No business slice is exempt from dependency checks.
 
-Server-only implementations, when introduced, must use separate `index.server.ts` APIs and `server-only`; never export server dependencies from a client-safe barrel. There is no live scanner or backend in this prototype.
+Server-only implementations must use separate `index.server.ts` APIs that import `server-only`; never export server dependencies from a client-safe barrel. The boundary checker treats `index.server.ts` as a public API, requires its `server-only` import, and rejects `"use client"` modules that import one. Route adapters may re-export an `_app` or `_pages` server API, such as a route handler. There is no live scanner or backend in this prototype.
 
 ## Product boundaries
 

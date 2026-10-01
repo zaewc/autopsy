@@ -5,6 +5,9 @@ import ts from "typescript";
 
 const LAYERS = ["_app", "_pages", "widgets", "features", "entities", "shared"];
 const SEGMENTS = new Set(["ui", "model", "api", "lib", "config"]);
+// Client-safe `index.ts` and server-only `index.server.ts` are the only public APIs.
+const PUBLIC_API = /^index(\.server)?\.(ts|tsx)$/;
+const SERVER_API = /^index\.server\.(ts|tsx)$/;
 function walk(dir) {
   return fs.existsSync(dir)
     ? fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -72,7 +75,7 @@ export function checkArchitecture(root) {
       if (
         !["_app", "shared"].includes(from.layer) &&
         !SEGMENTS.has(from.parts[2]) &&
-        from.parts[2] !== "index.ts"
+        !PUBLIC_API.test(from.parts[2] ?? "")
       ) {
         fail(
           file,
@@ -82,6 +85,22 @@ export function checkArchitecture(root) {
       if (from.layer === "shared" && !SEGMENTS.has(from.parts[1]))
         fail(file, "Shared contains purpose-based segments, not slices.");
     }
+    const client = source.statements.some(
+      (statement) =>
+        ts.isExpressionStatement(statement) &&
+        ts.isStringLiteral(statement.expression) &&
+        statement.expression.text === "use client",
+    );
+    if (
+      SERVER_API.test(path.basename(file)) &&
+      !source.statements.some(
+        (statement) =>
+          ts.isImportDeclaration(statement) &&
+          ts.isStringLiteral(statement.moduleSpecifier) &&
+          statement.moduleSpecifier.text === "server-only",
+      )
+    )
+      fail(file, 'Server public APIs must import "server-only".');
     const dependencies = [];
     function visit(node) {
       if (ts.isExportDeclaration(node) && !node.exportClause)
@@ -122,12 +141,14 @@ export function checkArchitecture(root) {
         else {
           dependencies.push(target);
           const to = address(root, target);
+          if (client && SERVER_API.test(path.basename(target)))
+            fail(file, "Client modules must not import a server public API.");
           if (!target.startsWith(path.join(root, "src") + path.sep))
             fail(file, "Product modules may only import from src.");
           else if (route) {
             if (
               !["_app", "_pages"].includes(to.layer) ||
-              !/^index\.(ts|tsx)$/.test(path.basename(target))
+              !PUBLIC_API.test(path.basename(target))
             )
               fail(file, "Routes must use an app segment or page public API.");
           } else if (from.scope === to.scope) {
@@ -145,7 +166,7 @@ export function checkArchitecture(root) {
                 file,
                 `Forbidden layer/sibling dependency ${from.scope} -> ${to.scope}.`,
               );
-            if (!/^index\.(ts|tsx)$/.test(path.basename(target)))
+            if (!PUBLIC_API.test(path.basename(target)))
               fail(file, `Import ${specifier} bypasses the public API.`);
           }
         }
