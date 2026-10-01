@@ -1,14 +1,10 @@
-import { BrandMark } from "@/shared/ui/brand-mark";
 export function ReportFooter() {
   return (
     <footer>
       <span>
-        <BrandMark small /> The details make the difference.
+        Scope: public response headers, documents, and network signals.
       </span>
-      <span>
-        Public signals. Clear evidence. No black boxes.
-        <span className="footer-cross">✳</span>
-      </span>
+      <span>Private infrastructure is unknown.</span>
     </footer>
   );
 }

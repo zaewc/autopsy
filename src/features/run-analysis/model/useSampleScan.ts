@@ -6,18 +6,14 @@ import {
 } from "@/entities/analysis-report";
 import { normalizeHttpUrl } from "@/shared/lib/web-url";
 export const SCAN_STAGES = [
-  "DISCOVERING",
-  "IDENTIFYING",
-  "PROFILING",
-  "ANALYZING",
-  "COMPLETE",
+  "URL accepted",
+  "Preparing example",
+  "Report ready",
 ] as const;
 export const SCAN_MESSAGES = [
-  "Resolving public surface…",
-  "Matching technology fingerprints…",
-  "Profiling resource timings…",
-  "Correlating diagnostic evidence…",
-  "Sample report ready.",
+  "Using this hostname as the report label.",
+  "Loading the same illustrative dataset for every URL.",
+  "Opening the sample report.",
 ] as const;
 export function useSampleScan(onComplete: (report: AnalysisReport) => void) {
   const [input, setInput] = useState("");
@@ -26,14 +22,11 @@ export function useSampleScan(onComplete: (report: AnalysisReport) => void) {
   const [domain, setDomain] = useState("");
   useEffect(() => {
     if (stage < 0) return;
-    const timer = setTimeout(
-      () => {
-        if (stage === SCAN_STAGES.length - 1)
-          onComplete(createSampleReport(domain));
-        else setStage((current) => current + 1);
-      },
-      stage === SCAN_STAGES.length - 1 ? 700 : 850,
-    );
+    const timer = setTimeout(() => {
+      if (stage === SCAN_STAGES.length - 1)
+        onComplete(createSampleReport(domain));
+      else setStage((current) => current + 1);
+    }, 200);
     return () => clearTimeout(timer);
   }, [stage, domain, onComplete]);
   function analyze(event: FormEvent) {

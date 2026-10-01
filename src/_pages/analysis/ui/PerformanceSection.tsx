@@ -3,12 +3,9 @@ import { Waterfall } from "./Waterfall";
 export function PerformanceSection({ network = false }: { network?: boolean }) {
   return (
     <section>
-      <SectionHeading
-        number="02"
-        title={network ? "Network requests" : "Performance"}
-      >
+      <SectionHeading title={network ? "Network requests" : "Performance"}>
         <span className="muted-caption">
-          <span className="green-dot" /> Simulated lab measurements
+          Illustrative values · not measured
         </span>
       </SectionHeading>
       <div className="vitals">
@@ -18,40 +15,32 @@ export function PerformanceSection({ network = false }: { network?: boolean }) {
             short: "LCP",
             value: "1.2",
             unit: "s",
-            good: true,
             caption: "Good",
             limit: "≤ 2.5 s",
-            bars: [24, 38, 29, 46, 31, 40, 26, 32, 22, 28, 25, 20],
           },
           {
             name: "Interaction to Next Paint",
             short: "INP",
             value: "84",
             unit: "ms",
-            good: true,
             caption: "Good",
             limit: "≤ 200 ms",
-            bars: [20, 29, 35, 22, 40, 29, 34, 22, 30, 23, 24, 19],
           },
           {
             name: "Cumulative Layout Shift",
             short: "CLS",
             value: "0.04",
             unit: "",
-            good: true,
             caption: "Good",
             limit: "≤ 0.1",
-            bars: [18, 18, 33, 18, 18, 18, 25, 18, 18, 18, 18, 18],
           },
           {
             name: "First Contentful Paint",
             short: "FCP",
             value: "0.8",
             unit: "s",
-            good: true,
             caption: "Good",
             limit: "≤ 1.8 s",
-            bars: [40, 36, 43, 30, 34, 27, 35, 23, 28, 20, 25, 19],
           },
         ].map((v) => (
           <div className="vital" key={v.short}>
@@ -62,20 +51,6 @@ export function PerformanceSection({ network = false }: { network?: boolean }) {
             <div className="vital-value">
               {v.value}
               <span>{v.unit}</span>
-              <div
-                className="spark"
-                role="img"
-                aria-label={`${v.short}: 12 illustrative measurements, latest ${v.value} ${v.unit}`}
-                title="12 illustrative measurements; the latest value is shown at left"
-              >
-                {v.bars.map((h, i) => (
-                  <i
-                    key={i}
-                    style={{ height: h }}
-                    title={`Sample ${i + 1}: ${((Number(v.value) * h) / v.bars[v.bars.length - 1]).toFixed(2)} ${v.unit}`}
-                  />
-                ))}
-              </div>
             </div>
             <div className="vital-footer">
               <span>
@@ -90,7 +65,7 @@ export function PerformanceSection({ network = false }: { network?: boolean }) {
       <div className="performance-details">
         <div className="requests-panel">
           <div className="subheading">
-            Request waterfall<span>6 of 42 requests · sample</span>
+            Request waterfall<span>6 example requests</span>
           </div>
           <Waterfall />
         </div>

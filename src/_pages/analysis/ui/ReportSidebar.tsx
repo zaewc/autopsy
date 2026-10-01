@@ -1,4 +1,4 @@
-import { Plus, Clock } from "lucide-react";
+import { Plus } from "lucide-react";
 import { BrandMark } from "@/shared/ui/brand-mark";
 import { REPORT_SECTIONS, type ReportSection } from "../config/reportSections";
 interface Props {
@@ -23,7 +23,7 @@ export function ReportSidebar({
     <aside className={`sidebar ${sidebar ? "open" : ""}`}>
       <a className="brand" href="/new" aria-label="autopsy home">
         <BrandMark />
-        autopsy<span className="beta">BETA</span>
+        autopsy
       </a>
       <button
         className="new-analysis"
@@ -54,10 +54,8 @@ export function ReportSidebar({
         ))}
       </nav>
       <div className="recent">
-        <div className="nav-label">
-          RECENT ANALYSES <Clock size={12} />
-        </div>
-        {history.map((h, i) => (
+        <div className="nav-label">SAMPLE HISTORY</div>
+        {history.map((h) => (
           <button
             key={h}
             onClick={() => {
@@ -65,23 +63,17 @@ export function ReportSidebar({
               onSelect("Overview");
             }}
           >
-            <span className={`history-dot ${i === 0 ? "green" : ""}`} />
             {h}
             <span>sample</span>
           </button>
         ))}
       </div>
       <div className="sidebar-bottom">
-        <div className="local-status">
-          <span className="pulse" />
-          Demo workspace<span>v0.1</span>
-        </div>
-        <div className="profile">
-          <span className="avatar">D</span>
-          <div>
-            Developer workspace<small>Public website intelligence</small>
-          </div>
-        </div>
+        <p className="sidebar-note">
+          Sample workspace
+          <br />
+          <span>No live scans are performed.</span>
+        </p>
       </div>
     </aside>
   );

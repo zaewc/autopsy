@@ -1,35 +1,29 @@
-export function ReportSummary() {
+import {
+  SAMPLE_FINDINGS,
+  SAMPLE_TECHNOLOGIES,
+} from "@/entities/analysis-report";
+import { ArrowRight } from "lucide-react";
+export function ReportSummary({ onFindings }: { onFindings: () => void }) {
+  const warnings = SAMPLE_FINDINGS.filter(
+    (finding) => finding.severity === "warning",
+  ).length;
   return (
     <div className="overview-banner">
-      <div className="score-ring">
-        <svg viewBox="0 0 80 80" aria-label="Sample health score 86 of 100">
-          <circle cx="40" cy="40" r="33" />
-          <circle cx="40" cy="40" r="33" className="score-arc" />
-        </svg>
-        <span>86</span>
-      </div>
       <div className="health-copy">
-        <div>
-          Looking healthy.<span>ROOM TO IMPROVE</span>
-        </div>
-        <p>A solid foundation, with a few things worth a closer look.</p>
+        <div>Report contents</div>
+        <p>Inspect the example evidence behind each finding.</p>
       </div>
       <div className="summary-metric">
-        <strong>6</strong>
+        <strong>{SAMPLE_TECHNOLOGIES.length}</strong>
         <span>Technologies</span>
       </div>
       <div className="summary-metric">
-        <strong>42</strong>
-        <span>Requests</span>
+        <strong>{warnings}</strong>
+        <span>Warnings</span>
       </div>
-      <div className="summary-metric">
-        <strong className="amber">3</strong>
-        <span>Findings</span>
-      </div>
-      <div className="scan-stamp">
-        <span className="green-dot" />
-        ANALYSIS COMPLETE<small>Sample duration: 8.42s</small>
-      </div>
+      <button className="summary-action" onClick={onFindings}>
+        Review {SAMPLE_FINDINGS.length} findings <ArrowRight size={16} />
+      </button>
     </div>
   );
 }

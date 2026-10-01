@@ -8,7 +8,7 @@ export function FindingsSection() {
   const [expanded, setExpanded] = useState<number | null>(null);
   return (
     <section className="findings-section">
-      <SectionHeading number="04" title="Worth a closer look">
+      <SectionHeading title="Worth a closer look">
         <div className="filter-buttons">
           {["All", "Warning", "Info"].map((f) => (
             <button

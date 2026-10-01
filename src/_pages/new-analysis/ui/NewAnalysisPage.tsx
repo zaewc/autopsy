@@ -18,7 +18,7 @@ export function NewAnalysisPage() {
       <header>
         <Link className="brand" href="/new">
           <BrandMark />
-          autopsy<span className="beta">BETA</span>
+          autopsy
         </Link>
         <Link href="/">Explore a sample report ↗</Link>
       </header>
@@ -26,9 +26,6 @@ export function NewAnalysisPage() {
         <div className="analysis-modal">
           <AnalysisForm onComplete={complete} />
         </div>
-        <p className="landing-note">
-          PUBLIC SIGNALS. CLEAR EVIDENCE. NO BLACK BOXES.
-        </p>
       </main>
     </div>
   );

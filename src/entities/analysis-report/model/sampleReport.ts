@@ -1,40 +1,47 @@
 import type { AnalysisReport, Technology, Finding } from "./types";
 export const SAMPLE_TECHNOLOGIES: readonly Technology[] = [
   {
-    logo: "N",
     name: "Next.js",
     version: "14.2.3",
     type: "Framework",
-    confidence: 99,
+    evidence: "/_next/static resource paths",
+    basis: "Observed",
   },
   {
-    logo: "⚛",
     name: "React",
     version: "18.3.1",
     type: "UI library",
-    confidence: 99,
+    evidence: "React runtime markers",
+    basis: "Observed",
   },
   {
-    logo: "TS",
     name: "TypeScript",
     version: "",
-    type: "Language · inferred",
-    confidence: 82,
+    type: "Language",
+    evidence:
+      "Source map naming; this does not prove the original source language.",
+    basis: "Inferred",
   },
-  { logo: "▲", name: "Vercel", version: "", type: "Hosting", confidence: 100 },
   {
-    logo: "☁",
+    name: "Vercel",
+    version: "",
+    type: "Hosting",
+    evidence: "x-vercel-id response header",
+    basis: "Observed",
+  },
+  {
     name: "Cloudflare",
     version: "",
     type: "CDN / DNS",
-    confidence: 96,
+    evidence: "cf-ray response header",
+    basis: "Observed",
   },
   {
-    logo: "◬",
     name: "Sentry",
     version: "7.x",
     type: "Monitoring",
-    confidence: 94,
+    evidence: "Sentry ingestion request",
+    basis: "Observed",
   },
 ];
 export const SAMPLE_FINDINGS: readonly Finding[] = [
@@ -72,7 +79,6 @@ export function createSampleReport(domain: string): AnalysisReport {
     domain,
     mode: "sample",
     notice: "Illustrative sample; no live website scan performed.",
-    score: 86,
     technologies: SAMPLE_TECHNOLOGIES,
     findings: SAMPLE_FINDINGS,
   };

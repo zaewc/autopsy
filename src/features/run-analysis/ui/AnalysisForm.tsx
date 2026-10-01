@@ -1,17 +1,9 @@
 "use client";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Globe,
-  Check,
-  Terminal,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight, Globe, Check } from "lucide-react";
 import {
   ArchitectureDiagram,
   type AnalysisReport,
 } from "@/entities/analysis-report";
-import { BrandMark } from "@/shared/ui/brand-mark";
 import {
   useSampleScan,
   SCAN_STAGES,
@@ -28,15 +20,14 @@ export function AnalysisForm({
   const { input, setInput, error, stage, analyze } = useSampleScan(onComplete);
   return (
     <div className="analysis-content">
-      <BrandMark />
-      <div className="eyebrow">THE WEB, DISSECTED.</div>
+      <div className="eyebrow">Explore a sample report</div>
       <h2 id={titleId}>
         Put the web under
         <br />a microscope.
       </h2>
       <p>
-        Explore the technology, performance, and architecture
-        <br className="desktop-br" /> behind any public website.
+        Enter a website URL to explore an example of its technical report. All
+        URLs use the same sample data; this demo does not scan websites.
       </p>
       <form onSubmit={analyze}>
         <Globe size={18} />
@@ -52,7 +43,7 @@ export function AnalysisForm({
           aria-describedby={error ? "url-error" : undefined}
         />
         <button disabled={stage >= 0} type="submit">
-          {stage >= 0 ? "Scanning" : "Analyze"}
+          {stage >= 0 ? "Preparing…" : "Open sample"}
           <ArrowRight size={16} />
         </button>
       </form>
@@ -88,18 +79,18 @@ export function AnalysisForm({
             </div>
           ))}
           <div className="scan-track">
-            <i style={{ width: `${(stage + 1) * 20}%` }} />
+            <i
+              style={{
+                transform: `scaleX(${(stage + 1) / SCAN_STAGES.length})`,
+              }}
+            />
           </div>
-          <p>
-            <Terminal size={13} />
-            {SCAN_MESSAGES[stage]}
-          </p>
+          <p>{SCAN_MESSAGES[stage]}</p>
         </div>
       )}
       <ArchitectureDiagram />
       <div className="modal-foot">
-        <ShieldCheck size={13} />
-        Interactive demo · generates sample reports, not live scans
+        Example architecture · select a node to inspect its evidence
       </div>
     </div>
   );
