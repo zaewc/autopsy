@@ -5,6 +5,7 @@ export type {
   AuditArea,
   AuditCheck,
   AnalysisReport,
+  ScannedDocument,
 } from "./model/types";
 export {
   detectTechnologies,

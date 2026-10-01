@@ -144,9 +144,12 @@ export function createSampleReport(domain: string): AnalysisReport {
   return {
     domain,
     mode: "sample",
+    url: `https://${domain}/`,
+    scannedAt: null,
     notice: "Illustrative sample; no live website scan performed.",
     technologies: SAMPLE_TECHNOLOGIES,
     findings: SAMPLE_FINDINGS,
     checks: SAMPLE_CHECKS,
+    document: null,
   };
 }
