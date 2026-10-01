@@ -1,13 +1,26 @@
 import type { Technology } from "../model/types";
+import type { RuntimeSignals } from "./runtimeProbe";
+
+/** What a browser observed after the page's scripts ran. */
+export interface RenderedSignals {
+  html: string;
+  /** URLs the page requested. */
+  requests: readonly string[];
+  runtime: Readonly<RuntimeSignals>;
+}
 
 export interface DocumentSignals {
   /** Lower-cased response header names. */
   headers: Readonly<Record<string, string>>;
   html: string;
+  rendered?: RenderedSignals | null;
 }
 
 type Signal =
-  { header: string; pattern?: RegExp } | { html: RegExp; label: string };
+  | { header: string; pattern?: RegExp }
+  | { html: RegExp; label: string }
+  /** A key reported by runtimeProbe, with how it was read. */
+  | { runtime: string; label: string };
 
 interface Rule {
   name: string;
@@ -38,6 +51,7 @@ const RULES: readonly Rule[] = [
     type: "Framework",
     implies: ["React"],
     signals: [
+      { runtime: "next", label: "window.next.version" },
       poweredBy(/Next\.js ?([\d.]*)/i),
       { header: "x-nextjs-cache" },
       { header: "x-nextjs-prerender" },
@@ -56,6 +70,7 @@ const RULES: readonly Rule[] = [
     type: "Framework",
     implies: ["Vue"],
     signals: [
+      { runtime: "nuxt", label: "Nuxt runtime global" },
       poweredBy(/Nuxt/i),
       { html: /<div[^>]+id=["']__nuxt["']/i, label: "Nuxt root element" },
       { html: /window\.__NUXT__\s*=/, label: "Nuxt state script" },
@@ -115,6 +130,7 @@ const RULES: readonly Rule[] = [
     name: "Angular",
     type: "Framework",
     signals: [
+      { runtime: "angular", label: "Angular runtime" },
       { html: /\sng-version=["']([\d.]+)["']/i, label: "ng-version attribute" },
     ],
   },
@@ -122,6 +138,7 @@ const RULES: readonly Rule[] = [
     name: "Vue",
     type: "UI library",
     signals: [
+      { runtime: "vue", label: "Vue app instance" },
       { html: /\sdata-v-app[\s>=]/i, label: "Vue app mount attribute" },
       {
         html: /\sdata-server-rendered=["']true["']/i,
@@ -133,6 +150,7 @@ const RULES: readonly Rule[] = [
     name: "React",
     type: "UI library",
     signals: [
+      { runtime: "react", label: "React fiber on DOM nodes" },
       { html: /\sdata-reactroot[\s>=]/i, label: "data-reactroot attribute" },
       { html: asset("react-dom@([\\d.]+)"), label: "react-dom script" },
     ],
@@ -328,7 +346,10 @@ const RULES: readonly Rule[] = [
   {
     name: "Google Tag Manager",
     type: "Tag manager",
-    signals: [{ html: /googletagmanager\.com\/gtm\.js/i, label: "GTM loader" }],
+    signals: [
+      { runtime: "gtm", label: "window.google_tag_manager" },
+      { html: /googletagmanager\.com\/gtm\.js/i, label: "GTM loader" },
+    ],
   },
   {
     name: "Google Analytics",
@@ -390,18 +411,23 @@ const RULES: readonly Rule[] = [
     name: "Segment",
     type: "Analytics",
     signals: [
+      { runtime: "segment", label: "window.analytics.VERSION" },
       { html: /cdn\.segment\.com\/analytics\.js/i, label: "Segment loader" },
     ],
   },
   {
     name: "Hotjar",
     type: "Analytics",
-    signals: [{ html: /static\.hotjar\.com\//i, label: "Hotjar loader" }],
+    signals: [
+      { runtime: "hotjar", label: "window.hj" },
+      { html: /static\.hotjar\.com\//i, label: "Hotjar loader" },
+    ],
   },
   {
     name: "Sentry",
     type: "Monitoring",
     signals: [
+      { runtime: "sentry", label: "window.__SENTRY__" },
       {
         html: asset("(?:browser|js)\\.sentry-cdn\\.com/([\\d.]+)?"),
         label: "Sentry CDN script",
@@ -412,6 +438,7 @@ const RULES: readonly Rule[] = [
     name: "Datadog RUM",
     type: "Monitoring",
     signals: [
+      { runtime: "datadog", label: "window.DD_RUM" },
       {
         html: asset("datadoghq-browser-agent\\.com/"),
         label: "Datadog browser agent",
@@ -422,6 +449,7 @@ const RULES: readonly Rule[] = [
     name: "New Relic",
     type: "Monitoring",
     signals: [
+      { runtime: "newrelic", label: "window.NREUM" },
       {
         html: /js-agent\.newrelic\.com\/|window\.NREUM/,
         label: "New Relic browser agent",
@@ -432,6 +460,7 @@ const RULES: readonly Rule[] = [
     name: "jQuery",
     type: "Library",
     signals: [
+      { runtime: "jquery", label: "jQuery.fn.jquery" },
       {
         html: asset("jquery[.-]?(\\d+\\.\\d+\\.\\d+)?(?:\\.min)?\\.js"),
         label: "jQuery script",
@@ -470,7 +499,10 @@ const RULES: readonly Rule[] = [
   {
     name: "Stripe",
     type: "Payments",
-    signals: [{ html: asset("js\\.stripe\\.com/"), label: "Stripe.js script" }],
+    signals: [
+      { runtime: "stripe", label: "window.Stripe" },
+      { html: asset("js\\.stripe\\.com/"), label: "Stripe.js script" },
+    ],
   },
   {
     name: "reCAPTCHA",
@@ -485,9 +517,30 @@ const RULES: readonly Rule[] = [
   {
     name: "Intercom",
     type: "Support",
-    signals: [{ html: /widget\.intercom\.io\//i, label: "Intercom widget" }],
+    signals: [
+      { runtime: "intercom", label: "window.Intercom" },
+      { html: /widget\.intercom\.io\//i, label: "Intercom widget" },
+    ],
   },
 ];
+
+const RUNTIME_RULES: readonly Rule[] = [
+  ["Svelte", "UI library", "svelte", "window.__svelte"],
+  ["SolidJS", "UI library", "solid", "Solid hydration global"],
+  ["Lit", "UI library", "lit", "Lit version registry"],
+  ["Alpine.js", "Library", "alpine", "window.Alpine"],
+  ["htmx", "Library", "htmx", "window.htmx"],
+  ["Ember.js", "Framework", "ember", "window.Ember"],
+  ["Hotwire Turbo", "Library", "turbo", "window.Turbo"],
+  ["PostHog", "Analytics", "posthog", "window.posthog"],
+  ["Mixpanel", "Analytics", "mixpanel", "window.mixpanel"],
+  ["Amplitude", "Analytics", "amplitude", "window.amplitude"],
+].map(([name, type, runtime, label]) => ({
+  name,
+  type,
+  signals: [{ runtime, label }],
+}));
+const ALL_RULES = [...RULES, ...RUNTIME_RULES];
 
 const INFERRED_TYPES: Readonly<Record<string, string>> = {
   React: "UI library",
@@ -500,48 +553,81 @@ function excerpt(text: string) {
   return compact.length > 120 ? `${compact.slice(0, 117)}…` : compact;
 }
 
-function match(
-  rule: Rule,
-  { headers, html }: DocumentSignals,
-): Technology | null {
+function technology(rule: Rule, version: string, evidence: string): Technology {
+  return {
+    name: rule.name,
+    version,
+    type: rule.type,
+    evidence,
+    basis: "Observed",
+  };
+}
+
+function matchHtml(rule: Rule, html: string, where: string) {
   for (const signal of rule.signals) {
-    if ("header" in signal) {
-      const value = headers[signal.header];
-      if (value === undefined) continue;
-      const found = signal.pattern ? value.match(signal.pattern) : [value];
-      if (!found) continue;
-      return {
-        name: rule.name,
-        version: signal.pattern ? (found[1] ?? "") : "",
-        type: rule.type,
-        evidence: `Response header ${signal.header}: ${excerpt(value)}`,
-        basis: "Observed",
-      };
-    }
+    if (!("html" in signal)) continue;
     const found = html.match(signal.html);
     if (found)
-      return {
-        name: rule.name,
-        version: found[1] ?? "",
-        type: rule.type,
-        evidence: `${signal.label} in the HTML document: ${excerpt(found[0])}`,
-        basis: "Observed",
-      };
+      return technology(
+        rule,
+        found[1] ?? "",
+        `${signal.label} in ${where}: ${excerpt(found[0])}`,
+      );
   }
   return null;
 }
 
+/** Strongest evidence first: headers, the HTML response, then browser signals. */
+function match(
+  rule: Rule,
+  { headers, html, rendered }: DocumentSignals,
+  requested: string,
+): Technology | null {
+  for (const signal of rule.signals) {
+    if (!("header" in signal)) continue;
+    const value = headers[signal.header];
+    if (value === undefined) continue;
+    const found = signal.pattern ? value.match(signal.pattern) : [value];
+    if (found)
+      return technology(
+        rule,
+        signal.pattern ? (found[1] ?? "") : "",
+        `Response header ${signal.header}: ${excerpt(value)}`,
+      );
+  }
+  const inDocument = matchHtml(rule, html, "the HTML document");
+  if (inDocument || !rendered) return inDocument;
+  const inDom = matchHtml(rule, rendered.html, "the rendered DOM");
+  if (inDom) return inDom;
+  for (const signal of rule.signals) {
+    if (!("runtime" in signal)) continue;
+    const value = rendered.runtime[signal.runtime];
+    if (value)
+      return technology(
+        rule,
+        value === "present" ? "" : value,
+        `${signal.label} after scripts ran${value === "present" ? "" : `: ${value}`}`,
+      );
+  }
+  return matchHtml(rule, requested, "a network request");
+}
+
 /**
- * Identify technologies from one HTTP response. Only the document and its
- * headers are inspected; scripts are not executed, so technologies that only
- * appear after client-side rendering are not detected.
+ * Identify technologies from one HTTP response and, when available, what a
+ * browser observed after running the page's scripts.
  */
 export function detectTechnologies(document: DocumentSignals): Technology[] {
-  const found = RULES.flatMap((rule) => match(rule, document) ?? []);
+  // Requested URLs are matched like asset attributes.
+  const requested = (document.rendered?.requests ?? [])
+    .map((url) => `src="${url}"`)
+    .join("\n");
+  const found = ALL_RULES.flatMap(
+    (rule) => match(rule, document, requested) ?? [],
+  );
   const names = new Set(found.map(({ name }) => name));
   const inferred: Technology[] = [];
   for (const technology of found)
-    for (const base of RULES.find(({ name }) => name === technology.name)
+    for (const base of ALL_RULES.find(({ name }) => name === technology.name)
       ?.implies ?? []) {
       if (names.has(base)) continue;
       names.add(base);

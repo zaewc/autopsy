@@ -10,7 +10,9 @@ export type {
 export {
   detectTechnologies,
   type DocumentSignals,
+  type RenderedSignals,
 } from "./lib/detectTechnologies";
+export { runtimeProbe, type RuntimeSignals } from "./lib/runtimeProbe";
 export { auditDocument, type AuditInput } from "./lib/auditDocument";
 export {
   architectureNodes,
