@@ -13,6 +13,13 @@ export interface Finding {
   fix: string;
   tag: string;
 }
+export type AuditArea = "Security" | "Accessibility" | "SEO";
+export interface AuditCheck {
+  area: AuditArea;
+  name: string;
+  status: "Passed" | "Review" | "Manual";
+  detail: string;
+}
 export interface AnalysisReport {
   domain: string;
   mode: "sample";
