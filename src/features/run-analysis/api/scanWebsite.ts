@@ -9,9 +9,7 @@ import {
 } from "@/entities/analysis-report";
 import {
   fetchPublicDocument,
-  isPublicAddress,
   PublicFetchError,
-  type FetchOptions,
   type FetchFailure,
   type PublicDocument,
 } from "@/shared/lib/public-http/index.server";
@@ -20,6 +18,8 @@ import {
   RenderError,
 } from "@/shared/lib/rendered-page/index.server";
 import { normalizeHttpUrl } from "@/shared/lib/web-url";
+import { reviewSecurity } from "./reviewSecurity";
+import { testFixtureOptions } from "./testFixture";
 
 export type ScanFailure = FetchFailure | "not-html";
 
@@ -70,20 +70,6 @@ function notice(document: PublicDocument, browserIssue: string | null) {
       `Only the first ${Math.round(document.bytes / 1000)} kB of the HTML document were inspected.`,
     );
   return parts.join(" ");
-}
-
-/**
- * Browser tests scan a fixture server on this loopback port. Never set it in a
- * deployment: it lets the scanner reach 127.0.0.1 on that port.
- */
-function testFixtureOptions(): FetchOptions {
-  const port = process.env.AUTOPSY_SCAN_FIXTURE_PORT;
-  if (!port) return {};
-  return {
-    isAllowedAddress: (address) =>
-      address === "127.0.0.1" || isPublicAddress(address),
-    allowedPorts: ["80", "443", port],
-  };
 }
 
 /** Deployments without Chromium can turn the browser stage off. */
@@ -172,16 +158,24 @@ export async function scanWebsite(
   const signals = { headers: document.headers, html: document.body };
   const { checks, findings } = auditDocument({ url: document.url, ...signals });
   const observed = await observeInBrowser(document.url, signal);
+  const technologies = detectTechnologies({
+    ...signals,
+    rendered: observed.rendered,
+  });
+  const security = await reviewSecurity({
+    document,
+    technologies,
+    rendered: observed.rendered,
+    browser: observed.browser,
+    signal,
+  });
   return {
     mode: "live",
     domain: target.hostname,
     url: document.url,
     scannedAt: new Date().toISOString(),
     notice: notice(document, observed.issue),
-    technologies: detectTechnologies({
-      ...signals,
-      rendered: observed.rendered,
-    }),
+    technologies,
     findings,
     checks,
     document: {
@@ -195,5 +189,6 @@ export async function scanWebsite(
       resources: countResources(document.body),
     },
     browser: observed.browser,
+    security,
   };
 }

@@ -153,5 +153,6 @@ export function createSampleReport(): AnalysisReport {
     checks: SAMPLE_CHECKS,
     document: null,
     browser: null,
+    security: null,
   };
 }

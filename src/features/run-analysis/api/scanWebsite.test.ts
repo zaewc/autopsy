@@ -21,6 +21,9 @@ vi.mock("@/shared/lib/public-http/index.server", () => ({
   PublicFetchError,
   isPublicAddress: () => true,
 }));
+vi.mock("@/shared/lib/osv/index.server", () => ({
+  queryOsv: vi.fn(async () => [[]]),
+}));
 vi.mock("@/shared/lib/rendered-page/index.server", () => ({
   renderPage,
   RenderError,
@@ -69,6 +72,8 @@ function respond(document: object) {
     responseMs: 120,
     bytes: 0,
     truncated: false,
+    setCookies: [],
+    tls: null,
     ...document,
   });
 }
@@ -109,6 +114,39 @@ describe("scanWebsite", () => {
     });
     expect(report.browser?.requests).toHaveLength(2);
     expect(report.notice).toMatch(/headless Chromium with scripts running/);
+  });
+
+  it("adds a passive security review without cookie values", async () => {
+    respond({
+      headers: { "content-type": "text/html" },
+      setCookies: ["session=secret; Path=/"],
+      tls: {
+        protocol: "TLSv1.3",
+        cipher: "TLS_AES_128_GCM_SHA256",
+        authorized: true,
+        certificate: null,
+      },
+    });
+    const report = await scanWebsite("github.com");
+    expect(fetchPublicDocument.mock.calls[1][0]).toBe(
+      "https://github.com/.well-known/security.txt",
+    );
+    expect(report.security?.tls?.protocol).toBe("TLSv1.3");
+    expect(report.security?.cookies.map(({ name }) => name)).toEqual([
+      "session",
+    ]);
+    expect(report.security?.issues.map(({ id }) => id)).toEqual(
+      expect.arrayContaining([
+        "cookie-secure-session",
+        "csp-missing",
+        "disclosure-security-txt-missing",
+      ]),
+    );
+    expect(report.security?.dependencyCheck).toEqual({
+      checked: [],
+      status: "none",
+    });
+    expect(JSON.stringify(report)).not.toContain("secret");
   });
 
   it("falls back to the HTML response when the browser stage fails", async () => {
