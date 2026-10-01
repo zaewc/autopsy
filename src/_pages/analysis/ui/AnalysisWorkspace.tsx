@@ -21,6 +21,7 @@ import { ReportFooter } from "./ReportFooter";
 import { ScanStatus } from "./ScanStatus";
 import { TechnologySection } from "./TechnologySection";
 import { PerformanceSection } from "./PerformanceSection";
+import { DocumentResponse } from "./DocumentResponse";
 import { ArchitectureSection } from "./ArchitectureSection";
 import { FindingsSection } from "./FindingsSection";
 import { AuditSection } from "./AuditSection";
@@ -204,12 +205,16 @@ export function AnalysisWorkspace({
                 )}
                 {(overview ||
                   active === "Performance" ||
-                  active === "Network") && (
-                  <PerformanceSection
-                    network={active === "Network"}
-                    live={live}
-                  />
-                )}
+                  active === "Network") &&
+                  (report.document ? (
+                    <DocumentResponse
+                      url={report.url}
+                      document={report.document}
+                      network={active === "Network"}
+                    />
+                  ) : (
+                    <PerformanceSection network={active === "Network"} />
+                  ))}
                 {(overview || active === "Architecture") && (
                   <ArchitectureSection
                     details={active === "Architecture"}
