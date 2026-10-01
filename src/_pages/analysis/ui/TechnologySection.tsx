@@ -64,9 +64,9 @@ export function TechnologySection({
         ))}
         {technologies.length === 0 && (
           <p className="empty-note">
-            No known technology signatures were found in the HTML document or
-            response headers. Libraries that load only after scripts run are not
-            detected, because scripts are not executed.
+            No known technology signatures were found in the response headers,
+            the HTML document, or the page the browser rendered. Bundled code
+            without public markers or globals cannot be identified.
           </p>
         )}
       </div>

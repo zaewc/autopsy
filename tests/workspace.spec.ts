@@ -85,9 +85,20 @@ test("live scan reports observed technologies with evidence", async ({
   const sections = page.getByRole("navigation", { name: "Report sections" });
   await sections.getByRole("button", { name: "Performance" }).click();
   await expect(page.getByText("HTTP status")).toBeVisible();
+  await expect(
+    page.getByText("Lab values · headless Chromium, desktop, no throttling"),
+  ).toBeVisible();
+  await expect(page.locator(".requests-panel .subheading")).toContainText(
+    /Request waterfall\s*First \d+ of \d+ requests/,
+  );
   await expect(page.getByText(/not in a visitor's browser/)).toBeVisible();
   await sections.getByRole("button", { name: "Network" }).click();
   await expect(page.getByText("1 redirect", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("row", {
+      name: new RegExp(`${FIXTURE}/_next/static/chunks/main-app\\.js JS 404`),
+    }),
+  ).toBeVisible();
   await expect(
     page.getByRole("row", { name: "x-vercel-id icn1::fixture" }),
   ).toBeVisible();
