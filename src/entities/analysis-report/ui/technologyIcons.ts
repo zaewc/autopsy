@@ -68,6 +68,7 @@ import {
   siSwiper,
   siThreedotjs,
   siTiktok,
+  siTypescript,
   siVercel,
   siVimeo,
   siVuedotjs,
@@ -169,4 +170,5 @@ export const TECHNOLOGY_ICONS: Readonly<Record<string, SimpleIcon>> = {
   Vimeo: siVimeo,
   Algolia: siAlgolia,
   Mapbox: siMapbox,
+  TypeScript: siTypescript,
 };

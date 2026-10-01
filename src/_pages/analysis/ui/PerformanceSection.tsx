@@ -1,13 +1,10 @@
 import { SectionHeading } from "@/shared/ui/section-heading";
+import {
+  SAMPLE_REQUESTS,
+  SAMPLE_TRANSFER_KB,
+  SAMPLE_VITALS,
+} from "../config/sampleMetrics";
 import { Waterfall } from "./Waterfall";
-const SAMPLE_REQUESTS = [
-  { name: "document", type: "HTML", start: 0, duration: 360 },
-  { name: "main-app.js", type: "JS", start: 225, duration: 855 },
-  { name: "framework.js", type: "JS", start: 285, duration: 570 },
-  { name: "layout.css", type: "CSS", start: 255, duration: 300 },
-  { name: "inter-latin.woff2", type: "FONT", start: 450, duration: 420 },
-  { name: "hero.webp", type: "IMG", start: 570, duration: 630 },
-];
 export function PerformanceSection({ network = false }: { network?: boolean }) {
   return (
     <section>
@@ -17,40 +14,7 @@ export function PerformanceSection({ network = false }: { network?: boolean }) {
         </span>
       </SectionHeading>
       <div className="vitals">
-        {[
-          {
-            name: "Largest Contentful Paint",
-            short: "LCP",
-            value: "1.2",
-            unit: "s",
-            caption: "Good",
-            limit: "≤ 2.5 s",
-          },
-          {
-            name: "Interaction to Next Paint",
-            short: "INP",
-            value: "84",
-            unit: "ms",
-            caption: "Good",
-            limit: "≤ 200 ms",
-          },
-          {
-            name: "Cumulative Layout Shift",
-            short: "CLS",
-            value: "0.04",
-            unit: "",
-            caption: "Good",
-            limit: "≤ 0.1",
-          },
-          {
-            name: "First Contentful Paint",
-            short: "FCP",
-            value: "0.8",
-            unit: "s",
-            caption: "Good",
-            limit: "≤ 1.8 s",
-          },
-        ].map((v) => (
+        {SAMPLE_VITALS.map((v) => (
           <div className="vital" key={v.short}>
             <div className="vital-label">
               {v.name}
@@ -83,7 +47,7 @@ export function PerformanceSection({ network = false }: { network?: boolean }) {
         </div>
         <div className="resource-panel">
           <div className="subheading">
-            Transferred resources<span>824 kB</span>
+            Transferred resources<span>{SAMPLE_TRANSFER_KB} kB</span>
           </div>
           <div
             className="resource-stack sample"

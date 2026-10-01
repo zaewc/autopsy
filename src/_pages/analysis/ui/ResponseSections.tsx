@@ -10,7 +10,7 @@ export function ResponseSections({
   view,
 }: {
   report: AnalysisReport;
-  view: "overview" | "performance" | "network";
+  view: "performance" | "network";
 }) {
   const { document, browser } = report;
   if (!document) return <PerformanceSection network={view === "network"} />;
@@ -23,7 +23,6 @@ export function ResponseSections({
     />
   );
   if (!browser) return response;
-  if (view === "overview") return <BrowserPerformance browser={browser} />;
   return (
     <>
       {view === "network" ? (

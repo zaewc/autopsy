@@ -22,6 +22,25 @@ test("sample report is labelled and not attributed to a website", async ({
   await expect(
     page.getByText(/do not describe any real website/),
   ).toBeVisible();
+  const overview = page.getByRole("region", { name: "Report overview" });
+  for (const section of [
+    "Technology",
+    "Performance",
+    "Network",
+    "Architecture",
+    "Security",
+    "Accessibility",
+    "SEO",
+    "Findings",
+  ])
+    await expect(
+      overview.getByRole("button", { name: new RegExp(`^Open ${section}:`) }),
+    ).toBeVisible();
+  await expect(overview).toContainText("Browser → Cloudflare → Next.js");
+  await overview.getByRole("button", { name: /^Open Findings:/ }).click();
+  await expect(
+    page.getByRole("tabpanel").getByRole("heading", { name: "Findings" }),
+  ).toBeVisible();
   await page
     .getByRole("button", { name: "JavaScript payload could be smaller" })
     .click();
@@ -65,6 +84,13 @@ test("live scan reports observed technologies with evidence", async ({
   await expect(page.locator(".report-note")).toContainText(
     "headless Chromium with scripts running",
   );
+  await expect(
+    page.locator('.glance-technologies svg[data-logo="Next.js"]'),
+  ).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Report sections" })
+    .getByRole("button", { name: "Technology", exact: true })
+    .click();
   await expect(
     page.locator('.technology-list svg[data-logo="Next.js"]'),
   ).toBeVisible();
@@ -122,10 +148,13 @@ test("prose mentioning Next.js paths is not detected as Next.js", async ({
   page,
 }) => {
   await page.goto(`/?site=${encodeURIComponent(`${FIXTURE}/plain`)}`);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "127.0.0.1",
-    { timeout: 15000 },
-  );
+  await expect(
+    page.getByRole("heading", { level: 1, name: "127.0.0.1 Open 127.0.0.1" }),
+  ).toBeVisible({ timeout: 15000 });
+  await page
+    .getByRole("navigation", { name: "Report sections" })
+    .getByRole("button", { name: "Technology", exact: true })
+    .click();
   await expect(
     page.locator(".technology-list").getByRole("button", { name: /^GitHub/ }),
   ).toBeVisible();
@@ -278,6 +307,7 @@ test("mobile navigation restores focus and reduced motion preserves readable evi
       .getByRole("complementary", { name: "Report navigation" })
       .getByRole("button", { name: "New analysis", exact: true }),
   ).toBeHidden();
+  await page.getByRole("tab", { name: /^Findings/ }).click();
   await page.getByRole("button", { name: /JavaScript payload/ }).click();
   await expect(
     page.getByRole("heading", { name: "Suggested improvement" }),
