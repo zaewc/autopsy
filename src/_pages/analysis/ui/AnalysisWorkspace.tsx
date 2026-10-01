@@ -217,8 +217,8 @@ export function AnalysisWorkspace({
                   ))}
                 {(overview || active === "Architecture") && (
                   <ArchitectureSection
+                    report={report}
                     details={active === "Architecture"}
-                    live={live}
                   />
                 )}
                 {(overview || active === "Findings") && (

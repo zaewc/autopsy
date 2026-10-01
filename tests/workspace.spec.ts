@@ -65,11 +65,17 @@ test("live scan reports observed technologies with evidence", async ({
   await expect(page.locator(".report-note")).toContainText(
     "Scripts were not executed",
   );
-  await page.getByRole("button", { name: /^Next\.js/ }).click();
+  await page
+    .locator(".technology-list")
+    .getByRole("button", { name: /^Next\.js/ })
+    .click();
   await expect(
     page.getByText("Response header x-powered-by: Next.js"),
   ).toBeVisible();
-  await page.getByRole("button", { name: /^React/ }).click();
+  await page
+    .locator(".technology-list")
+    .getByRole("button", { name: /^React/ })
+    .click();
   await expect(page.getByText(/Inferred because Next\.js/)).toBeVisible();
   await page
     .getByRole("navigation", { name: "Report sections" })
@@ -85,6 +91,14 @@ test("live scan reports observed technologies with evidence", async ({
   await expect(
     page.getByRole("row", { name: "x-vercel-id icn1::fixture" }),
   ).toBeVisible();
+  await sections.getByRole("button", { name: "Architecture" }).click();
+  await page.getByRole("button", { name: /^Vercel/ }).click();
+  await expect(
+    page.getByText("Vercel: Response header x-vercel-id: icn1::fixture"),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^Origin services/ }),
+  ).toBeVisible();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export report" }).click();
   expect((await download).suggestedFilename()).toBe("autopsy-127.0.0.1.json");
@@ -98,9 +112,15 @@ test("prose mentioning Next.js paths is not detected as Next.js", async ({
     "127.0.0.1",
     { timeout: 15000 },
   );
-  await expect(page.getByRole("button", { name: /^GitHub/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /^Next\.js/ })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /^React/ })).toHaveCount(0);
+  await expect(
+    page.locator(".technology-list").getByRole("button", { name: /^GitHub/ }),
+  ).toBeVisible();
+  await expect(
+    page.locator(".technology-list").getByRole("button", { name: /^Next\.js/ }),
+  ).toHaveCount(0);
+  await expect(
+    page.locator(".technology-list").getByRole("button", { name: /^React/ }),
+  ).toHaveCount(0);
 });
 
 test("landing form opens a live report", async ({ page }) => {

@@ -12,4 +12,9 @@ export {
   type DocumentSignals,
 } from "./lib/detectTechnologies";
 export { auditDocument, type AuditInput } from "./lib/auditDocument";
+export {
+  architectureNodes,
+  type ArchitectureNode,
+  type ArchitectureRole,
+} from "./lib/architectureNodes";
 export { ArchitectureDiagram } from "./ui/ArchitectureDiagram";
