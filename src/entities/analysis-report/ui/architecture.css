@@ -1,0 +1,131 @@
+.architecture {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 35px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background-color: #141617;
+  background-image: radial-gradient(#333b39 0.65px, transparent 0.65px);
+  background-size: 13px 13px;
+  gap: 35px;
+}
+.architecture-line {
+  position: absolute;
+  height: 1px;
+  background: #47534a;
+  left: 11%;
+  right: 11%;
+  top: 50%;
+}
+.node {
+  z-index: 1;
+  background: #1b1e1d;
+  border: 1px solid #424c45;
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  padding: 13px 15px;
+  column-gap: 7px;
+  position: relative;
+  flex: 1;
+  max-width: 175px;
+}
+.node-icon {
+  grid-row: span 2;
+  display: flex;
+  align-items: center;
+  color: #a4b5aa;
+}
+.node strong {
+  font-size: 10px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.node small {
+  font: 7px var(--mono);
+  color: #75867c;
+  letter-spacing: 0.7px;
+  margin-top: 6px;
+}
+.node.inferred {
+  border-style: dashed;
+  border-color: #555e60;
+  background: #191c1d;
+}
+.node.inferred .node-icon,
+.node.inferred small {
+  color: #899397;
+}
+.node-arrow {
+  position: absolute;
+  right: -26px;
+  top: calc(50% - 7px);
+  color: #7e9385;
+  background: #151817;
+}
+@media (min-width: 1600px) {
+  .architecture {
+    padding: 30px 50px;
+  }
+}
+@media (max-width: 1200px) {
+  .node {
+    padding: 12px 9px;
+  }
+  .architecture {
+    padding: 23px 20px;
+    gap: 28px;
+  }
+  .node-arrow {
+    right: -22px;
+  }
+}
+@media (max-width: 960px) {
+  .node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+  }
+  .node small {
+    font-size: 6px;
+    margin-top: 0;
+  }
+}
+@media (max-width: 700px) {
+  .architecture {
+    padding: 18px 10px;
+    gap: 15px;
+  }
+  .node {
+    padding: 11px 5px;
+    min-width: 0;
+    gap: 7px;
+  }
+  .node strong {
+    font-size: 8px;
+  }
+  .node small {
+    font-size: 5px;
+    letter-spacing: 0.2px;
+  }
+  .node-arrow {
+    right: -14px;
+    width: 11px;
+  }
+}
+.node:hover,
+.node[aria-pressed="true"] {
+  background: #26332a;
+  border-color: #829b88;
+}
+.architecture-evidence {
+  color: #a0b6a6;
+  font-size: 11px;
+  line-height: 1.8;
+  padding: 10px 14px;
+  border-left: 2px solid #829b88;
+  background: #18211b;
+}

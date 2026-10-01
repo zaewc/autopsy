@@ -1,8 +1,12 @@
-export function AnalysisPage() {
-  return (
-    <main>
-      <h1>autopsy</h1>
-      <p>Website diagnostic workspace.</p>
-    </main>
-  );
+import { normalizeHttpUrl } from "@/shared/lib/web-url";
+import { AnalysisWorkspace } from "./AnalysisWorkspace";
+export async function AnalysisPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ site?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const value = typeof params.site === "string" ? params.site : "";
+  const domain = normalizeHttpUrl(value)?.hostname ?? "linear.app";
+  return <AnalysisWorkspace initialDomain={domain} />;
 }

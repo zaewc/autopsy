@@ -1,0 +1,52 @@
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -1.1px;
+  padding-left: 10px;
+}
+.brand-mark {
+  display: inline-grid;
+  grid-template-columns: repeat(2, 8px);
+  gap: 3px;
+  transform: rotate(-9deg);
+  flex-shrink: 0;
+}
+.brand-mark span {
+  width: 8px;
+  height: 8px;
+  background: #b0d6b6;
+}
+.brand-mark span:nth-child(2) {
+  border-radius: 0 5px 0 0;
+}
+.brand-mark span:nth-child(3) {
+  border-radius: 0 0 0 5px;
+}
+.brand-mark.small {
+  grid-template-columns: repeat(2, 5px);
+  gap: 2px;
+}
+.brand-mark.small span {
+  height: 5px;
+  width: 5px;
+}
+.beta {
+  font: 8px var(--mono);
+  border: 1px solid #3a3c3c;
+  padding: 3px 4px;
+  letter-spacing: 0.5px;
+  color: #969a9b;
+  margin-left: 1px;
+}
+@media (max-width: 960px) {
+  .brand {
+    font-size: 22px;
+    gap: 7px;
+  }
+  .beta {
+    font-size: 7px;
+  }
+}

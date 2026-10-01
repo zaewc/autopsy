@@ -13,3 +13,13 @@ Single-page blocks stay in that page's `ui`; page-specific state stays in its `m
 Steiger applies its recommended FSD rules. Three narrowly documented compatibility settings follow Patchwork: prefixed Next.js layer names, App segments, and module-level Shared APIs. `scripts/checkArchitecture.mjs` independently enforces layer order (including the prefixed names), same-layer isolation, public API access, explicit route adapters, and cycles. Its negative-fixture tests ensure violations are rejected, including dynamic and type imports. No business slice is exempt from dependency checks.
 
 Server-only implementations, when introduced, must use separate `index.server.ts` APIs and `server-only`; never export server dependencies from a client-safe barrel. There is no live scanner or backend in this prototype.
+
+## Product boundaries
+
+`_pages/analysis` owns the report workspace, its navigation, section selection, report export, and page-only sections. `_pages/new-analysis` owns the standalone entry experience. Neither page imports the other.
+
+`features/run-analysis` owns URL-entry state and the cancellable sample-scan lifecycle. Both pages consume its `AnalysisForm` public API and receive completion through a callback; the feature never imports a router or a page.
+
+`entities/analysis-report` owns the report contract, sample fixtures, and the architecture evidence visualization. The domain is consumed by both the feature and report page. Generic URL normalization and native dialog behavior live in module-level Shared APIs.
+
+Component styles are colocated with their owning UI modules. `_app/styles` contains only global foundations and design primitives. The Widgets layer is intentionally absent: no composed widget is shared by these two screens. Report export remains page-local because only the report page owns that action.
