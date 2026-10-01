@@ -103,5 +103,59 @@ export function runtimeProbe(): RuntimeSignals {
     read(scope, "Stripe", "version"),
   );
   note("hotjar", typeof scope.hj === "function");
+  note(
+    "reactRouter",
+    scope.__reactRouterVersion || scope.__reactRouterContext,
+    scope.__reactRouterVersion,
+  );
+  note("tanstackQuery", scope.__TANSTACK_QUERY_CLIENT__);
+  note("zod", scope.__zod_globalConfig || scope.__zod_globalRegistry);
+  note("three", scope.__THREE__, scope.__THREE__);
+  note(
+    "gsap",
+    scope.gsapVersions || scope.gsap,
+    read(scope, "gsapVersions", "0"),
+  );
+  note(
+    "turbopack",
+    Object.keys(scope).some((key) => key.startsWith("TURBOPACK")),
+  );
+  note("apollo", scope.__APOLLO_CLIENT__);
+  note("prism", read(scope, "Prism", "highlightAll"));
+  note("d3", read(scope, "d3", "select"), read(scope, "d3", "version"));
+  note(
+    "chartjs",
+    read(scope, "Chart", "register"),
+    read(scope, "Chart", "version"),
+  );
+  note("leaflet", read(scope, "L", "map"), read(scope, "L", "version"));
+  note(
+    "moment",
+    read(scope, "moment", "isMoment"),
+    read(scope, "moment", "version"),
+  );
+  note(
+    "firebase",
+    read(scope, "firebase", "SDK_VERSION"),
+    read(scope, "firebase", "SDK_VERSION"),
+  );
+  note(
+    "lottie",
+    read(scope, "lottie", "loadAnimation") ||
+      read(scope, "bodymovin", "loadAnimation"),
+  );
+  note("swiper", typeof scope.Swiper === "function");
+  note("tealium", read(scope, "utag", "link"));
+  note("metaPixel", typeof scope.fbq === "function" || scope._fbq);
+  note("linkedinInsight", typeof scope.lintrk === "function");
+  note("tiktokPixel", read(scope, "ttq", "track"));
+  note("clarity", typeof scope.clarity === "function");
+  note("hubspot", scope._hsq);
+  note("onetrust", scope.OneTrust);
+  note("cookiebot", scope.Cookiebot);
+  note("zendesk", typeof scope.zE === "function");
+  note("crisp", scope.$crisp);
+  note("hcaptcha", read(scope, "hcaptcha", "render"));
+  note("turnstile", read(scope, "turnstile", "render"));
   return found;
 }
