@@ -1,4 +1,4 @@
-# Webopsy
+# autopsy
 
 A developer-oriented website diagnostic workspace built with Next.js App Router, React, TypeScript, and Tailwind CSS.
 
