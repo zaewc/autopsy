@@ -1,0 +1,50 @@
+.landing {
+  min-height: 100vh;
+  background-image: radial-gradient(#303b33 0.7px, transparent 0.7px);
+  background-size: 24px 24px;
+}
+.landing > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 5%;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+.landing > header > a:last-child {
+  font: 11px var(--mono);
+  color: var(--green);
+}
+.landing > main {
+  padding: 80px 20px 50px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.landing .analysis-modal {
+  box-shadow: 0 20px 90px #0005;
+}
+.landing-note {
+  font: 9px var(--mono);
+  letter-spacing: 1.5px;
+  color: #7f9284;
+  margin-top: 28px;
+  text-align: center;
+}
+@media (max-width: 700px) {
+  .landing > main {
+    padding: 45px 15px;
+  }
+  .landing > header {
+    padding: 20px 15px;
+  }
+  .landing > header > a:last-child {
+    font-size: 8px;
+  }
+  .landing .brand {
+    font-size: 21px;
+  }
+  .landing-note {
+    font-size: 7px;
+  }
+}

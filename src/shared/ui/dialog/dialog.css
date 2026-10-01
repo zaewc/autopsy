@@ -1,0 +1,31 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: #080a09d9;
+  backdrop-filter: blur(9px);
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.modal-close {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  color: #8f9b95;
+}
+dialog.modal-backdrop {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  color: var(--text);
+}
+dialog.modal-backdrop:not([open]) {
+  display: none;
+}
+dialog.modal-backdrop::backdrop {
+  background: #080a09b0;
+}
