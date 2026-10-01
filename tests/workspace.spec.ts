@@ -65,6 +65,9 @@ test("live scan reports observed technologies with evidence", async ({
   await expect(page.locator(".report-note")).toContainText(
     "headless Chromium with scripts running",
   );
+  await expect(
+    page.locator('.technology-list svg[data-logo="Next.js"]'),
+  ).toBeVisible();
   await page
     .locator(".technology-list")
     .getByRole("button", { name: /^Next\.js/ })

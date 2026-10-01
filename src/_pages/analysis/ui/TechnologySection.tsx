@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import type { Technology } from "@/entities/analysis-report";
+import { TechnologyLogo, type Technology } from "@/entities/analysis-report";
 import { SectionHeading } from "@/shared/ui/section-heading";
 export function TechnologySection({
   technologies,
@@ -38,6 +38,7 @@ export function TechnologySection({
               }
             >
               <span className="technology-name">
+                <TechnologyLogo name={technology.name} />
                 {technology.name}
                 <small>{technology.version}</small>
               </span>

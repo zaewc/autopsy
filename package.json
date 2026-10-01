@@ -22,7 +22,8 @@
     "playwright-core": "1.63.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "simple-icons": "^16.33.0"
   },
   "devDependencies": {
     "@feature-sliced/steiger-plugin": "^0.7.0",

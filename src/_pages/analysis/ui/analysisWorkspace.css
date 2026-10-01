@@ -348,11 +348,12 @@
 }
 .technology-name {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
+  align-items: center;
+  gap: var(--space-2);
   font-weight: 500;
 }
 .technology-name small {
+  margin-left: var(--space-1);
   font: 12px var(--mono);
   color: var(--muted);
 }
