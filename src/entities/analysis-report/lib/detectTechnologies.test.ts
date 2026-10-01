@@ -90,4 +90,70 @@ describe("detectTechnologies", () => {
     expect(technology.evidence.length).toBeLessThan(160);
     expect(technology.evidence.endsWith("…")).toBe(true);
   });
+
+  describe("with browser signals", () => {
+    const rendered = (
+      html: string,
+      runtime: Record<string, string> = {},
+      requests: string[] = [],
+    ) => ({ html, runtime, requests });
+
+    it("finds client-rendered markup only present after scripts ran", () => {
+      const [angular] = detectTechnologies({
+        headers: {},
+        html: "<app-root></app-root>",
+        rendered: rendered(
+          '<app-root ng-version="19.2.0"><h1>Hi</h1></app-root>',
+        ),
+      });
+      expect(angular).toMatchObject({
+        name: "Angular",
+        version: "19.2.0",
+        evidence:
+          'ng-version attribute in the rendered DOM: ng-version="19.2.0"',
+      });
+    });
+
+    it("reads runtime globals and keeps React observed instead of inferred", () => {
+      const technologies = detectTechnologies({
+        headers: { "x-powered-by": "Next.js" },
+        html: "",
+        rendered: rendered("", { next: "15.1.0", react: "present" }),
+      });
+      expect(
+        technologies.find(({ name }) => name === "Next.js")?.evidence,
+      ).toBe("Response header x-powered-by: Next.js");
+      expect(technologies.find(({ name }) => name === "React")).toMatchObject({
+        basis: "Observed",
+        evidence: "React fiber on DOM nodes after scripts ran",
+      });
+    });
+
+    it("detects runtime-only technologies with versions", () => {
+      const found = detectTechnologies({
+        headers: {},
+        html: "",
+        rendered: rendered("", { svelte: "5", htmx: "2.0.4" }),
+      });
+      expect(found.map(({ name, version }) => `${name}@${version}`)).toEqual([
+        "Svelte@5",
+        "htmx@2.0.4",
+      ]);
+    });
+
+    it("detects third-party scripts injected at runtime from requests", () => {
+      const [analytics] = detectTechnologies({
+        headers: {},
+        html: "",
+        rendered: rendered("", {}, [
+          "https://www.googletagmanager.com/gtag/js?id=G-1",
+        ]),
+      });
+      expect(analytics).toMatchObject({
+        name: "Google Analytics",
+        evidence:
+          'gtag.js script in a network request: src="https://www.googletagmanager.com/gtag/js?id=G-1"',
+      });
+    });
+  });
 });
