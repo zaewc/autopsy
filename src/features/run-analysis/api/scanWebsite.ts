@@ -1,7 +1,10 @@
 import {
   auditDocument,
   detectTechnologies,
+  runtimeProbe,
   type AnalysisReport,
+  type BrowserObservation,
+  type RenderedSignals,
   type ScannedDocument,
 } from "@/entities/analysis-report";
 import {
@@ -12,6 +15,10 @@ import {
   type FetchFailure,
   type PublicDocument,
 } from "@/shared/lib/public-http/index.server";
+import {
+  renderPage,
+  RenderError,
+} from "@/shared/lib/rendered-page/index.server";
 import { normalizeHttpUrl } from "@/shared/lib/web-url";
 
 export type ScanFailure = FetchFailure | "not-html";
@@ -46,10 +53,14 @@ function publicHeaders(headers: PublicDocument["headers"]) {
   return result;
 }
 
-function notice(document: PublicDocument) {
-  const parts = [
-    "Static inspection of one HTTP response fetched by the autopsy server. Scripts were not executed, so client-rendered technologies and browser metrics are not included.",
-  ];
+function notice(document: PublicDocument, browserIssue: string | null) {
+  const parts = browserIssue
+    ? [
+        `Browser stage unavailable: ${browserIssue} Results come from the HTML response only; scripts were not executed, so client-rendered technologies and browser metrics are not included.`,
+      ]
+    : [
+        "The autopsy server fetched the HTML response and loaded the page in headless Chromium with scripts running. Timings are lab values from that server (desktop viewport, no throttling); interaction latency is not measured. Security, accessibility, and SEO checks read the HTML response.",
+      ];
   if (document.status < 200 || document.status >= 300)
     parts.push(
       `The site answered with HTTP ${document.status}; results describe that response, which may be an error or bot-protection page rather than the site itself.`,
@@ -75,7 +86,62 @@ function testFixtureOptions(): FetchOptions {
   };
 }
 
-/** Fetch a public website once and analyze its document and headers. */
+/** Deployments without Chromium can turn the browser stage off. */
+const browserEnabled = () => process.env.AUTOPSY_BROWSER_SCAN !== "0";
+
+async function observeInBrowser(
+  url: string,
+  signal: AbortSignal | undefined,
+): Promise<
+  | { rendered: RenderedSignals; browser: BrowserObservation; issue: null }
+  | { rendered: null; browser: null; issue: string }
+> {
+  if (!browserEnabled())
+    return {
+      rendered: null,
+      browser: null,
+      issue: "It is turned off on this server.",
+    };
+  try {
+    const page = await renderPage(url, {
+      probe: runtimeProbe,
+      signal,
+      network: testFixtureOptions(),
+    });
+    return {
+      rendered: {
+        html: page.html,
+        requests: page.requests.map((request) => request.url),
+        runtime: page.probe,
+      },
+      browser: {
+        url: page.url,
+        vitals: page.vitals,
+        requests: page.requests,
+        requestsTruncated: page.requestsTruncated,
+        consoleErrors: page.consoleErrors,
+        blocked: page.blocked,
+      },
+      issue: null,
+    };
+  } catch (error) {
+    if (signal?.aborted)
+      throw new ScanError("aborted", "The scan was cancelled.");
+    return {
+      rendered: null,
+      browser: null,
+      issue:
+        error instanceof RenderError
+          ? error.message
+          : "The page could not be loaded in the browser.",
+    };
+  }
+}
+
+/**
+ * Fetch a public website, load it in a browser when possible, and analyze its
+ * response, rendered page, and network activity.
+ */
 export async function scanWebsite(
   input: string,
   { signal }: { signal?: AbortSignal } = {},
@@ -105,13 +171,17 @@ export async function scanWebsite(
     );
   const signals = { headers: document.headers, html: document.body };
   const { checks, findings } = auditDocument({ url: document.url, ...signals });
+  const observed = await observeInBrowser(document.url, signal);
   return {
     mode: "live",
     domain: target.hostname,
     url: document.url,
     scannedAt: new Date().toISOString(),
-    notice: notice(document),
-    technologies: detectTechnologies(signals),
+    notice: notice(document, observed.issue),
+    technologies: detectTechnologies({
+      ...signals,
+      rendered: observed.rendered,
+    }),
     findings,
     checks,
     document: {
@@ -124,5 +194,6 @@ export async function scanWebsite(
       headers: publicHeaders(document.headers),
       resources: countResources(document.body),
     },
+    browser: observed.browser,
   };
 }

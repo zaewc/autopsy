@@ -6,6 +6,8 @@ export type {
   AuditCheck,
   AnalysisReport,
   ScannedDocument,
+  BrowserObservation,
+  BrowserRequest,
 } from "./model/types";
 export {
   detectTechnologies,

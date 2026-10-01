@@ -35,6 +35,33 @@ export interface ScannedDocument {
   /** Elements referenced by the HTML document itself. */
   resources: { scripts: number; stylesheets: number; images: number };
 }
+export interface BrowserRequest {
+  url: string;
+  /** Browser resource type: document, script, stylesheet, image, font, fetch, … */
+  type: string;
+  status: number | null;
+  bytes: number;
+  startMs: number;
+  durationMs: number | null;
+  failure: string | null;
+}
+/** What headless Chromium observed while the page's scripts ran. */
+export interface BrowserObservation {
+  /** URL after redirects and client-side navigation. */
+  url: string;
+  /** Lab values from the scanning server: desktop viewport, no throttling. */
+  vitals: {
+    ttfbMs: number | null;
+    fcpMs: number | null;
+    lcpMs: number | null;
+    cls: number | null;
+  };
+  requests: readonly BrowserRequest[];
+  requestsTruncated: boolean;
+  consoleErrors: number;
+  /** Destinations refused by the scanner's network policy. */
+  blocked: readonly string[];
+}
 export interface AnalysisReport {
   domain: string;
   mode: "sample" | "live";
@@ -48,4 +75,6 @@ export interface AnalysisReport {
   checks: readonly AuditCheck[];
   /** Live scans only. */
   document: ScannedDocument | null;
+  /** Live scans whose browser stage succeeded. */
+  browser: BrowserObservation | null;
 }
