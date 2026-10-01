@@ -2,7 +2,9 @@ import http from "node:http";
 import { isIP } from "node:net";
 import https from "node:https";
 import type { Readable } from "node:stream";
+import type { TLSSocket } from "node:tls";
 import zlib from "node:zlib";
+import { describeTls, type TlsDetails } from "./describeTls";
 import { isPublicAddress } from "./isPublicAddress";
 import { createGuardedLookup, PublicNetworkError } from "./publicLookup";
 
@@ -17,6 +19,10 @@ export interface PublicDocument {
   redirects: readonly string[];
   /** Milliseconds from the final request until its response headers. */
   responseMs: number;
+  /** Each Set-Cookie header of the final response, unjoined. */
+  setCookies: readonly string[];
+  /** TLS session of the final response; null over plain HTTP. */
+  tls: TlsDetails | null;
   /** Decoded body bytes read. */
   bytes: number;
   /** The body exceeded `maxBytes` and was cut off. */
@@ -137,6 +143,7 @@ function request(
   return new Promise<{
     response: http.IncomingMessage;
     responseMs: number;
+    tls: TlsDetails | null;
   }>((resolve, reject) => {
     const started = performance.now();
     const outgoing = client.get(
@@ -151,7 +158,15 @@ function request(
         },
       },
       (response) =>
-        resolve({ response, responseMs: performance.now() - started }),
+        resolve({
+          response,
+          responseMs: performance.now() - started,
+          // Read now: the socket may be reused or closed after the body.
+          tls:
+            url.protocol === "https:"
+              ? describeTls(response.socket as TLSSocket)
+              : null,
+        }),
     );
     outgoing.on("error", reject);
   });
@@ -225,7 +240,7 @@ export async function fetchPublicDocument(
     }
     for (;;) {
       checkUrl(url, options);
-      const { response, responseMs } = await request(
+      const { response, responseMs, tls } = await request(
         url,
         options,
         controller.signal,
@@ -249,6 +264,8 @@ export async function fetchPublicDocument(
         headers: headerRecord(response),
         redirects,
         responseMs: Math.round(responseMs),
+        setCookies: response.headers["set-cookie"] ?? [],
+        tls,
         ...body,
       };
     }

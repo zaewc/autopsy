@@ -1,4 +1,5 @@
 import "server-only";
+export { type TlsDetails } from "./describeTls";
 export { isPublicAddress } from "./isPublicAddress";
 export { publicLookup, PublicNetworkError } from "./publicLookup";
 export {

@@ -60,6 +60,8 @@ describe("fetchPublicDocument", () => {
     expect(document.body).toContain("Hello ✓");
     expect(document.headers["x-powered-by"]).toBe("Test");
     expect(document.headers["set-cookie"]).toBe("a=1, b=2");
+    expect(document.setCookies).toEqual(["a=1", "b=2"]);
+    expect(document.tls).toBeNull();
     expect(document.responseMs).toBeGreaterThanOrEqual(0);
     expect(document.truncated).toBe(false);
   });
