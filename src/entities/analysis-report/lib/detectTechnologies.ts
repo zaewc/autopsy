@@ -99,6 +99,7 @@ const RULES: readonly Rule[] = [
     type: "Framework",
     implies: ["React"],
     signals: [
+      { runtime: "reactRouter", label: "window.__reactRouterVersion" },
       {
         html: /window\.__reactRouterContext\s*=/,
         label: "React Router framework context",
@@ -432,6 +433,10 @@ const RULES: readonly Rule[] = [
         html: asset("(?:browser|js)\\.sentry-cdn\\.com/([\\d.]+)?"),
         label: "Sentry CDN script",
       },
+      {
+        html: asset("\\.ingest\\.(?:[a-z]+\\.)?sentry\\.io/"),
+        label: "Sentry ingestion request",
+      },
     ],
   },
   {
@@ -535,12 +540,140 @@ const RUNTIME_RULES: readonly Rule[] = [
   ["PostHog", "Analytics", "posthog", "window.posthog"],
   ["Mixpanel", "Analytics", "mixpanel", "window.mixpanel"],
   ["Amplitude", "Analytics", "amplitude", "window.amplitude"],
+  [
+    "React Query",
+    "Library",
+    "tanstackQuery",
+    "window.__TANSTACK_QUERY_CLIENT__",
+  ],
+  ["Zod", "Library", "zod", "Zod global registry"],
+  ["Three.js", "Library", "three", "window.__THREE__"],
+  ["GSAP", "Library", "gsap", "GSAP version registry"],
+  ["Turbopack", "Bundler", "turbopack", "TURBOPACK chunk-loading global"],
+  ["Apollo Client", "Library", "apollo", "window.__APOLLO_CLIENT__"],
+  ["Prism", "Library", "prism", "window.Prism"],
+  ["D3", "Library", "d3", "window.d3"],
+  ["Chart.js", "Library", "chartjs", "window.Chart"],
+  ["Leaflet", "Library", "leaflet", "window.L"],
+  ["Moment.js", "Library", "moment", "window.moment"],
+  ["Firebase", "Backend service", "firebase", "firebase.SDK_VERSION"],
+  ["Lottie", "Library", "lottie", "window.lottie"],
+  ["Swiper", "Library", "swiper", "window.Swiper"],
+  ["Crisp", "Support", "crisp", "window.$crisp"],
 ].map(([name, type, runtime, label]) => ({
   name,
   type,
   signals: [{ runtime, label }],
 }));
-const ALL_RULES = [...RULES, ...RUNTIME_RULES];
+
+// Third-party services seen in a runtime global or a request to their host.
+const SERVICE_RULES: readonly Rule[] = [
+  ["Contentful", "CMS", "", "ctfassets\\.net/", "Contentful asset"],
+  [
+    "Vercel Blob",
+    "Storage",
+    "",
+    "\\.blob\\.vercel-storage\\.com/",
+    "Vercel Blob object",
+  ],
+  ["Tealium", "Tag manager", "tealium", "tags\\.tiqcdn\\.com/", "Tealium tag"],
+  [
+    "Meta Pixel",
+    "Advertising",
+    "metaPixel",
+    "connect\\.facebook\\.net/[^\"']*fbevents",
+    "Meta Pixel script",
+  ],
+  [
+    "LinkedIn Insight Tag",
+    "Advertising",
+    "linkedinInsight",
+    "snap\\.licdn\\.com/",
+    "LinkedIn Insight script",
+  ],
+  [
+    "TikTok Pixel",
+    "Advertising",
+    "tiktokPixel",
+    "analytics\\.tiktok\\.com/",
+    "TikTok Pixel script",
+  ],
+  [
+    "Google Ads",
+    "Advertising",
+    "",
+    "(?:ad\\.doubleclick\\.net|googleadservices\\.com)/",
+    "Google ads request",
+  ],
+  [
+    "Microsoft Clarity",
+    "Analytics",
+    "clarity",
+    "clarity\\.ms/",
+    "Clarity script",
+  ],
+  [
+    "HubSpot",
+    "Marketing",
+    "hubspot",
+    "(?:js\\.hs-scripts\\.com|js\\.hsforms\\.net|js\\.hs-analytics\\.net)/",
+    "HubSpot script",
+  ],
+  [
+    "OneTrust",
+    "Consent",
+    "onetrust",
+    "cdn\\.cookielaw\\.org/",
+    "OneTrust consent script",
+  ],
+  [
+    "Cookiebot",
+    "Consent",
+    "cookiebot",
+    "consent\\.cookiebot\\.com/",
+    "Cookiebot consent script",
+  ],
+  [
+    "Zendesk",
+    "Support",
+    "zendesk",
+    "static\\.zdassets\\.com/",
+    "Zendesk widget",
+  ],
+  ["Wistia", "Video", "", "fast\\.wistia\\.(?:com|net)/", "Wistia player"],
+  [
+    "YouTube",
+    "Video",
+    "",
+    "youtube(?:-nocookie)?\\.com/(?:iframe_api|embed/)",
+    "YouTube embed",
+  ],
+  ["Vimeo", "Video", "", "player\\.vimeo\\.com/", "Vimeo player"],
+  [
+    "Algolia",
+    "Search",
+    "",
+    "(?:algolia\\.net|algolianet\\.com)/",
+    "Algolia search request",
+  ],
+  ["Mapbox", "Maps", "", "api\\.mapbox\\.com/", "Mapbox request"],
+  ["hCaptcha", "Security", "hcaptcha", "hcaptcha\\.com/", "hCaptcha script"],
+  [
+    "Cloudflare Turnstile",
+    "Security",
+    "turnstile",
+    "challenges\\.cloudflare\\.com/turnstile/",
+    "Turnstile script",
+  ],
+].map(([name, type, runtime, host, label]) => ({
+  name,
+  type,
+  signals: [
+    ...(runtime ? [{ runtime, label: `${name} runtime global` }] : []),
+    { html: asset(host), label },
+  ],
+}));
+const ALL_RULES = [...RULES, ...RUNTIME_RULES, ...SERVICE_RULES];
 
 const INFERRED_TYPES: Readonly<Record<string, string>> = {
   React: "UI library",

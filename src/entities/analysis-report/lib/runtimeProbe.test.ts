@@ -15,6 +15,11 @@ const PAGE = `<!doctype html><html><body><div id="app"></div><script>
   window.__svelte = { v: new Set(["5"]) };
   window.jQuery = { fn: { jquery: "3.7.1" } };
   window.htmx = { version: "not-a-version" };
+  window.__reactRouterVersion = "7.9.1";
+  window.__THREE__ = "180";
+  window.gsapVersions = ["3.13.0"];
+  window["TURBOPACK_chunk_loading"] = [];
+  window.utag = { link() {} };
 </script></body></html>`;
 
 beforeAll(async () => {
@@ -45,5 +50,10 @@ it("reads runtime globals in a real browser", { timeout: 30_000 }, async () => {
     svelte: "5",
     jquery: "3.7.1",
     htmx: "present",
+    reactRouter: "7.9.1",
+    three: "180",
+    gsap: "3.13.0",
+    turbopack: "present",
+    tealium: "present",
   });
 });

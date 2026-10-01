@@ -141,6 +141,44 @@ describe("detectTechnologies", () => {
       ]);
     });
 
+    it("detects libraries and services seen on github.com and shopify.com", () => {
+      const found = detectTechnologies({
+        headers: {},
+        html: "",
+        rendered: rendered(
+          "",
+          {
+            reactRouter: "7.9.1",
+            tanstackQuery: "present",
+            zod: "present",
+            three: "180",
+            gsap: "3.13.0",
+            tealium: "present",
+          },
+          [
+            "https://images.ctfassets.net/8aevphvgewt8/hero.webp",
+            "https://connect.facebook.net/en_US/fbevents.js",
+            "https://snap.licdn.com/li.lms-analytics/insight.min.js",
+            "https://o205439.ingest.us.sentry.io/api/1/envelope/",
+          ],
+        ),
+      }).map(({ name, version }) => (version ? `${name}@${version}` : name));
+      expect(found).toEqual(
+        expect.arrayContaining([
+          "React Router@7.9.1",
+          "React Query",
+          "Zod",
+          "Three.js@180",
+          "GSAP@3.13.0",
+          "Tealium",
+          "Contentful",
+          "Meta Pixel",
+          "LinkedIn Insight Tag",
+          "Sentry",
+        ]),
+      );
+    });
+
     it("detects third-party scripts injected at runtime from requests", () => {
       const [analytics] = detectTechnologies({
         headers: {},
