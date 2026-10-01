@@ -14,6 +14,7 @@ export type {
   SecurityHeader,
   SecurityIssue,
   SecuritySeverity,
+  ThirdPartyScript,
   TlsSummary,
 } from "./model/types";
 export {
@@ -27,6 +28,11 @@ export {
   type SecurityAnalysis,
   type SecurityInput,
 } from "./lib/analyzeSecurity";
+export {
+  analyzeContent,
+  type ContentAnalysis,
+  type ContentInput,
+} from "./lib/analyzeContent";
 export { auditDocument, type AuditInput } from "./lib/auditDocument";
 export {
   architectureNodes,

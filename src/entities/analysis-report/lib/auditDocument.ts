@@ -1,4 +1,5 @@
 import type { AuditCheck, AuditArea, Finding } from "../model/types";
+import { tags, visibleMarkup } from "./markup";
 
 export interface AuditInput {
   /** Final URL after redirects. */
@@ -6,29 +7,6 @@ export interface AuditInput {
   /** Lower-cased response header names. */
   headers: Readonly<Record<string, string>>;
   html: string;
-}
-
-type Attributes = Record<string, string>;
-
-/** Markup outside scripts, styles, templates, and comments. */
-function visibleMarkup(html: string) {
-  return html
-    .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/<(script|style|template|noscript)\b[\s\S]*?<\/\1\s*>/gi, "");
-}
-
-function tags(markup: string, name: string): Attributes[] {
-  return Array.from(
-    markup.matchAll(new RegExp(`<${name}\\b([^>]*)>`, "gi")),
-    ([, source]) => {
-      const attributes: Attributes = {};
-      for (const [, key, quoted, single, bare] of source.matchAll(
-        /([^\s"'=/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g,
-      ))
-        attributes[key.toLowerCase()] = quoted ?? single ?? bare ?? "";
-      return attributes;
-    },
-  );
 }
 
 const ENTITIES: Readonly<Record<string, string>> = {
