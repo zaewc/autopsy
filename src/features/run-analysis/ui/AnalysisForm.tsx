@@ -1,35 +1,40 @@
 "use client";
-import { ArrowRight, ArrowUpRight, Globe, Check } from "lucide-react";
-import {
-  ArchitectureDiagram,
-  type AnalysisReport,
-} from "@/entities/analysis-report";
-import {
-  useSampleScan,
-  SCAN_STAGES,
-  SCAN_MESSAGES,
-} from "../model/useSampleScan";
+import { useState, type FormEvent } from "react";
+import { ArrowRight, ArrowUpRight, Globe } from "lucide-react";
+import { normalizeHttpUrl } from "@/shared/lib/web-url";
 import "./analysisForm.css";
+const EXAMPLES = ["github.com", "nextjs.org", "wordpress.org"];
 export function AnalysisForm({
-  onComplete,
+  onSubmit,
   titleId = "analysis-title",
 }: {
-  onComplete: (report: AnalysisReport) => void;
+  /** Receives a validated http(s) URL. */
+  onSubmit: (url: URL) => void;
   titleId?: string;
 }) {
-  const { input, setInput, error, stage, analyze } = useSampleScan(onComplete);
+  const [input, setInput] = useState("");
+  const [error, setError] = useState("");
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    const url = normalizeHttpUrl(input);
+    if (!url)
+      return setError("Enter a valid website URL, such as example.com.");
+    setError("");
+    onSubmit(url);
+  }
   return (
     <div className="analysis-content">
-      <div className="eyebrow">Explore a sample report</div>
+      <div className="eyebrow">New analysis</div>
       <h2 id={titleId}>
         Put the web under
         <br />a microscope.
       </h2>
       <p>
-        Enter a website URL to explore an example of its technical report. All
-        URLs use the same sample data; this demo does not scan websites.
+        Enter a public website URL. autopsy fetches its HTML document once and
+        reports the technologies, response headers, and basic checks it can see.
+        Scripts are not executed.
       </p>
-      <form onSubmit={analyze}>
+      <form onSubmit={submit} noValidate>
         <Globe size={18} />
         <input
           aria-label="Website URL"
@@ -37,13 +42,12 @@ export function AnalysisForm({
           placeholder="https://example.com"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          disabled={stage >= 0}
           required
           aria-invalid={!!error}
           aria-describedby={error ? "url-error" : undefined}
         />
-        <button disabled={stage >= 0} type="submit">
-          {stage >= 0 ? "Preparing…" : "Open sample"}
+        <button type="submit">
+          Analyze
           <ArrowRight size={16} />
         </button>
       </form>
@@ -52,45 +56,18 @@ export function AnalysisForm({
           {error}
         </p>
       )}
-      {stage < 0 ? (
-        <div className="try-example">
-          Try an example
-          <button onClick={() => setInput("https://linear.app")}>
-            linear.app
+      <div className="try-example">
+        Try
+        {EXAMPLES.map((example) => (
+          <button
+            key={example}
+            type="button"
+            onClick={() => setInput(`https://${example}`)}
+          >
+            {example}
             <ArrowUpRight size={12} />
           </button>
-          <button onClick={() => setInput("https://vercel.com")}>
-            vercel.com
-            <ArrowUpRight size={12} />
-          </button>
-        </div>
-      ) : (
-        <div className="scan-progress" role="status" aria-live="polite">
-          {SCAN_STAGES.map((name, index) => (
-            <div className={index <= stage ? "done" : ""} key={name}>
-              <span>
-                {index < stage ? (
-                  <Check size={12} />
-                ) : (
-                  String(index + 1).padStart(2, "0")
-                )}
-              </span>
-              {name}
-            </div>
-          ))}
-          <div className="scan-track">
-            <i
-              style={{
-                transform: `scaleX(${(stage + 1) / SCAN_STAGES.length})`,
-              }}
-            />
-          </div>
-          <p>{SCAN_MESSAGES[stage]}</p>
-        </div>
-      )}
-      <ArchitectureDiagram />
-      <div className="modal-foot">
-        Example architecture · select a node to inspect its evidence
+        ))}
       </div>
     </div>
   );

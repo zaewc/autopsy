@@ -1,6 +1,23 @@
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { Waterfall } from "./Waterfall";
-export function PerformanceSection({ network = false }: { network?: boolean }) {
+export function PerformanceSection({
+  network = false,
+  live,
+}: {
+  network?: boolean;
+  live: boolean;
+}) {
+  if (live)
+    return (
+      <section>
+        <SectionHeading title={network ? "Network requests" : "Performance"} />
+        <p className="empty-note">
+          Browser timings, Core Web Vitals, and the request waterfall require
+          loading the page in a browser. This scan fetches only the HTML
+          document, so they are not measured.
+        </p>
+      </section>
+    );
   return (
     <section>
       <SectionHeading title={network ? "Network requests" : "Performance"}>

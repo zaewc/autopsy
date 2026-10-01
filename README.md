@@ -18,21 +18,26 @@ npm run typecheck
 
 ## Scope
 
-This is an interactive frontend prototype. All report values, technology examples, timings, and findings are illustrative sample data. Entering a URL runs a staged demonstration and labels the sample report with that hostname; it does not fetch or analyze that website. Recent reports are held in memory for the current session. JSON exports preserve the sample-data designation.
+Entering a URL runs a live scan. The autopsy server fetches that one HTML document (following up to 5 redirects, within 10 seconds and 2 MB) and reports:
 
-The interface includes nine report views, expandable evidence, finding filters, resource timing charts, an observed/inferred architecture diagram, report copy/download, URL validation, responsive navigation, and reduced-motion support. Charts are native CSS/SVG and require no charting dependency.
+- technologies identified from response headers and HTML markup, each with the matched evidence and an observed/inferred basis;
+- security header, document language, image, and search metadata checks, with findings for the items that need review.
 
-A production implementation needs a separate isolated browser scanning service, public-network URL validation, measured audit results, and persistent reports. Private infrastructure must remain unknown unless independently evidenced.
+Scripts are not executed, so client-rendered libraries, Core Web Vitals, and request waterfalls are not measured. The scanner only connects to public internet addresses on ports 80 and 443: private, loopback, link-local, and reserved hosts are rejected at every redirect and at socket connection time. There is no rate limiting yet; add it before exposing the scanner publicly.
+
+`/` without a URL shows an illustrative sample report that is not attributed to any website. Recent scans are held in memory for the current session. JSON exports keep the `sample` or `live` designation.
 
 ## Architecture and checks
 
 Use Node 24 (`nvm use`). Routes are thin re-exports; product code follows Feature-Sliced Design under `src`. See [architecture decisions](docs/architecture.md) and [contributor rules](AGENTS.md).
 
-- `/`: interactive sample report.
-- `/new`: URL entry and sample report preparation, sharing `features/run-analysis` with the report dialog.
-- `entities/analysis-report`: report types, illustrative fixtures, and architecture evidence visualization.
+- `/`: report workspace; `/?site=<url>` scans that URL, and no parameter shows the sample report.
+- `/new`: URL entry, sharing `features/run-analysis` with the report dialog.
+- `/api/scan?url=`: server scan endpoint returning a report or a typed error.
+- `features/run-analysis`: URL form, client scan lifecycle, and the server-only `scanWebsite`.
+- `entities/analysis-report`: report types, technology detection, document audit, the sample fixture, and architecture evidence visualization.
 - `_pages/analysis`: report composition, navigation, section state, and export actions.
-- `shared`: domain-independent URL normalization and reusable UI primitives.
+- `shared`: URL normalization, the server-only public-network fetch, and reusable UI primitives.
 
 ```sh
 npm run check
@@ -48,4 +53,4 @@ npx playwright install chrome
 npm run test:all
 ```
 
-Local tests use Chrome; CI installs Playwright Chromium. The harness builds and starts a production server on port 3100, with `.next-e2e` isolated from normal `.next` output. It covers report navigation, URL errors, sample preparation, cancellation, evidence expansion, export, keyboard navigation, and desktop/mobile viewport fit. GitHub Actions runs these checks for every PR and push to `main`.
+Local tests use Chrome; CI installs Playwright Chromium. The harness builds and starts a production server on port 3100, with `.next-e2e` isolated from normal `.next` output, plus fixture websites on port 3101 (`tests/fixtures/siteServer.mjs`). `AUTOPSY_SCAN_FIXTURE_PORT` lets the scanner reach that loopback port during tests only; never set it in a deployment. Tests cover the sample report, live scans of fixture sites (including a page that mentions Next.js paths in prose), blocked and non-HTML targets, scan cancellation, evidence expansion, export, keyboard navigation, and desktop/mobile viewport fit. GitHub Actions runs these checks for every PR and push to `main`.

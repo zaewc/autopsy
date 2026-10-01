@@ -12,7 +12,9 @@ export function ReportSummary({
   ).length;
   return (
     <div className="overview-banner">
-      <p className="summary-label">In this example</p>
+      <p className="summary-label">
+        {report.mode === "live" ? "In this scan" : "In this example"}
+      </p>
       <div className="summary-metric">
         <strong>{report.technologies.length}</strong>
         <span>Technologies</span>
@@ -22,7 +24,8 @@ export function ReportSummary({
         <span>Warnings</span>
       </div>
       <button className="summary-action" onClick={onFindings}>
-        Review {report.findings.length} findings <ArrowRight size={16} />
+        Review {report.findings.length} finding
+        {report.findings.length === 1 ? "" : "s"} <ArrowRight size={16} />
       </button>
     </div>
   );

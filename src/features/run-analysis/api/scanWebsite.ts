@@ -6,7 +6,9 @@ import {
 } from "@/entities/analysis-report";
 import {
   fetchPublicDocument,
+  isPublicAddress,
   PublicFetchError,
+  type FetchOptions,
   type FetchFailure,
   type PublicDocument,
 } from "@/shared/lib/public-http/index.server";
@@ -59,6 +61,20 @@ function notice(document: PublicDocument) {
   return parts.join(" ");
 }
 
+/**
+ * Browser tests scan a fixture server on this loopback port. Never set it in a
+ * deployment: it lets the scanner reach 127.0.0.1 on that port.
+ */
+function testFixtureOptions(): FetchOptions {
+  const port = process.env.AUTOPSY_SCAN_FIXTURE_PORT;
+  if (!port) return {};
+  return {
+    isAllowedAddress: (address) =>
+      address === "127.0.0.1" || isPublicAddress(address),
+    allowedPorts: ["80", "443", port],
+  };
+}
+
 /** Fetch a public website once and analyze its document and headers. */
 export async function scanWebsite(
   input: string,
@@ -72,7 +88,10 @@ export async function scanWebsite(
     );
   let document: PublicDocument;
   try {
-    document = await fetchPublicDocument(target, { signal });
+    document = await fetchPublicDocument(target, {
+      signal,
+      ...testFixtureOptions(),
+    });
   } catch (error) {
     if (error instanceof PublicFetchError)
       throw new ScanError(error.code, error.message);

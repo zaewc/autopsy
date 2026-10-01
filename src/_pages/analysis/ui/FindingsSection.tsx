@@ -64,6 +64,11 @@ export function FindingsSection({
               </div>
             ),
         )}
+        {findings.length === 0 && (
+          <p className="empty-note">
+            No findings from the security, accessibility, and SEO checks.
+          </p>
+        )}
       </div>
     </section>
   );
