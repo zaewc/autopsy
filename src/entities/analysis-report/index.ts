@@ -8,6 +8,13 @@ export type {
   ScannedDocument,
   BrowserObservation,
   BrowserRequest,
+  CookieSummary,
+  CspDirective,
+  SecurityCategory,
+  SecurityHeader,
+  SecurityIssue,
+  SecuritySeverity,
+  TlsSummary,
 } from "./model/types";
 export {
   detectTechnologies,
@@ -15,6 +22,11 @@ export {
   type RenderedSignals,
 } from "./lib/detectTechnologies";
 export { runtimeProbe, type RuntimeSignals } from "./lib/runtimeProbe";
+export {
+  analyzeSecurity,
+  type SecurityAnalysis,
+  type SecurityInput,
+} from "./lib/analyzeSecurity";
 export { auditDocument, type AuditInput } from "./lib/auditDocument";
 export {
   architectureNodes,
