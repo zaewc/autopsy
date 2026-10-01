@@ -33,6 +33,7 @@ export function AnalysisWorkspace({
     setActive,
     domain,
     setDomain,
+    report,
     modal,
     setModal,
     sidebar,
@@ -59,6 +60,7 @@ export function AnalysisWorkspace({
         sidebar={sidebar}
         active={active}
         history={history}
+        findings={report.findings.length}
         onAnalyze={() => {
           setModal(true);
           setSidebar(false);
@@ -129,7 +131,10 @@ export function AnalysisWorkspace({
             <strong>Sample report.</strong> These values illustrate a report
             layout; no live website scan has been performed.
           </div>
-          <ReportSummary onFindings={() => setActive("Findings")} />
+          <ReportSummary
+            report={report}
+            onFindings={() => setActive("Findings")}
+          />
           <ReportTabs active={active} onSelect={setActive} />
           <div
             id="report-panel"
@@ -138,17 +143,27 @@ export function AnalysisWorkspace({
             tabIndex={0}
             key={domain}
           >
-            {(overview || active === "Technology") && <TechnologySection />}
+            {(overview || active === "Technology") && (
+              <TechnologySection technologies={report.technologies} />
+            )}
             {(overview || active === "Performance" || active === "Network") && (
               <PerformanceSection network={active === "Network"} />
             )}
             {(overview || active === "Architecture") && (
               <ArchitectureSection details={active === "Architecture"} />
             )}
-            {(overview || active === "Findings") && <FindingsSection />}
+            {(overview || active === "Findings") && (
+              <FindingsSection findings={report.findings} />
+            )}
             {(active === "Security" ||
               active === "Accessibility" ||
-              active === "SEO") && <AuditSection active={active} />}
+              active === "SEO") && (
+              <AuditSection
+                area={active}
+                checks={report.checks}
+                caption="Sample checks"
+              />
+            )}
           </div>
           <ReportFooter />
         </main>

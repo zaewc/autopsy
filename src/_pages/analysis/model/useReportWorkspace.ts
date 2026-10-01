@@ -74,6 +74,7 @@ export function useReportWorkspace(initialDomain: string) {
     setActive,
     domain,
     setDomain,
+    report,
     modal,
     setModal,
     sidebar,

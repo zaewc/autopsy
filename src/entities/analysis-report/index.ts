@@ -1,8 +1,4 @@
-export {
-  SAMPLE_TECHNOLOGIES,
-  SAMPLE_FINDINGS,
-  createSampleReport,
-} from "./model/sampleReport";
+export { createSampleReport } from "./model/sampleReport";
 export type {
   Technology,
   Finding,

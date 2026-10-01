@@ -1,17 +1,20 @@
-import {
-  SAMPLE_FINDINGS,
-  SAMPLE_TECHNOLOGIES,
-} from "@/entities/analysis-report";
+import type { AnalysisReport } from "@/entities/analysis-report";
 import { ArrowRight } from "lucide-react";
-export function ReportSummary({ onFindings }: { onFindings: () => void }) {
-  const warnings = SAMPLE_FINDINGS.filter(
+export function ReportSummary({
+  report,
+  onFindings,
+}: {
+  report: AnalysisReport;
+  onFindings: () => void;
+}) {
+  const warnings = report.findings.filter(
     (finding) => finding.severity === "warning",
   ).length;
   return (
     <div className="overview-banner">
       <p className="summary-label">In this example</p>
       <div className="summary-metric">
-        <strong>{SAMPLE_TECHNOLOGIES.length}</strong>
+        <strong>{report.technologies.length}</strong>
         <span>Technologies</span>
       </div>
       <div className="summary-metric">
@@ -19,7 +22,7 @@ export function ReportSummary({ onFindings }: { onFindings: () => void }) {
         <span>Warnings</span>
       </div>
       <button className="summary-action" onClick={onFindings}>
-        Review {SAMPLE_FINDINGS.length} findings <ArrowRight size={16} />
+        Review {report.findings.length} findings <ArrowRight size={16} />
       </button>
     </div>
   );

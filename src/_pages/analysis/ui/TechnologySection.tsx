@@ -1,15 +1,19 @@
 "use client";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { SAMPLE_TECHNOLOGIES } from "@/entities/analysis-report";
+import type { Technology } from "@/entities/analysis-report";
 import { SectionHeading } from "@/shared/ui/section-heading";
-export function TechnologySection() {
+export function TechnologySection({
+  technologies,
+}: {
+  technologies: readonly Technology[];
+}) {
   const [expanded, setExpanded] = useState<string | null>(null);
   return (
     <section>
       <SectionHeading title="Technology stack">
         <span className="muted-caption">
-          {SAMPLE_TECHNOLOGIES.length} examples · select to inspect
+          {technologies.length} examples · select to inspect
         </span>
       </SectionHeading>
       <div className="technology-list">
@@ -18,7 +22,7 @@ export function TechnologySection() {
           <span>Role</span>
           <span>Example signal</span>
         </div>
-        {SAMPLE_TECHNOLOGIES.map((technology) => (
+        {technologies.map((technology) => (
           <div className="technology-item" key={technology.name}>
             <button
               className="technology-row"
