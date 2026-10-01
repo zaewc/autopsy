@@ -9,10 +9,7 @@ export function ReportSummary({ onFindings }: { onFindings: () => void }) {
   ).length;
   return (
     <div className="overview-banner">
-      <div className="health-copy">
-        <div>Report contents</div>
-        <p>Inspect the example evidence behind each finding.</p>
-      </div>
+      <p className="summary-label">In this example</p>
       <div className="summary-metric">
         <strong>{SAMPLE_TECHNOLOGIES.length}</strong>
         <span>Technologies</span>

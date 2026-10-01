@@ -8,12 +8,13 @@ export function FindingsSection() {
   const [expanded, setExpanded] = useState<number | null>(null);
   return (
     <section className="findings-section">
-      <SectionHeading title="Worth a closer look">
+      <SectionHeading title="Findings">
         <div className="filter-buttons">
           {["All", "Warning", "Info"].map((f) => (
             <button
               key={f}
               className={filter === f ? "active" : ""}
+              aria-pressed={filter === f}
               onClick={() => setFilter(f)}
             >
               {f}
@@ -32,9 +33,7 @@ export function FindingsSection() {
                   aria-expanded={expanded === i}
                   onClick={() => setExpanded(expanded === i ? null : i)}
                 >
-                  <span className={`severity ${f.severity}`}>
-                    {f.severity === "warning" ? "!" : "i"}
-                  </span>
+                  <span className={`severity ${f.severity}`}>{f.severity}</span>
                   <span className="finding-title">{f.title}</span>
                   <span className="finding-tag">{f.tag}</span>
                   <ChevronDown

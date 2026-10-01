@@ -1,4 +1,6 @@
-import { Plus } from "lucide-react";
+"use client";
+import { useEffect, useRef } from "react";
+import { Plus, X } from "lucide-react";
 import { BrandMark } from "@/shared/ui/brand-mark";
 import { REPORT_SECTIONS, type ReportSection } from "../config/reportSections";
 interface Props {
@@ -19,8 +21,52 @@ export function ReportSidebar({
   onSelect,
   onDomain,
 }: Props) {
+  const asideRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!sidebar) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    asideRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    return () => {
+      document.body.style.overflow = overflow;
+      previous?.focus();
+    };
+  }, [sidebar]);
   return (
-    <aside className={`sidebar ${sidebar ? "open" : ""}`}>
+    <aside
+      ref={asideRef}
+      id="report-navigation"
+      aria-label="Report navigation"
+      className={`sidebar ${sidebar ? "open" : ""}`}
+      onKeyDown={(event) => {
+        if (!sidebar) return;
+        if (event.key === "Escape") {
+          event.preventDefault();
+          onClose();
+        }
+        if (event.key !== "Tab") return;
+        const targets =
+          asideRef.current?.querySelectorAll<HTMLElement>("a[href], button");
+        if (!targets?.length) return;
+        const first = targets[0],
+          last = targets[targets.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }}
+    >
+      <button
+        className="sidebar-close icon-button"
+        aria-label="Close navigation"
+        onClick={onClose}
+      >
+        <X size={18} />
+      </button>
       <a className="brand" href="/new" aria-label="autopsy home">
         <BrandMark />
         autopsy
@@ -33,13 +79,15 @@ export function ReportSidebar({
         }}
       >
         <Plus size={16} />
-        New analysis<kbd>⌘ K</kbd>
+        New analysis<kbd aria-hidden="true">⌘ K</kbd>
       </button>
       <div className="nav-label">WORKSPACE</div>
       <nav aria-label="Report sections">
         {REPORT_SECTIONS.map(({ name, icon: Icon }) => (
           <button
             key={name}
+            aria-current={active === name ? "page" : undefined}
+            aria-controls="report-panel"
             className={`nav-item ${active === name ? "selected" : ""}`}
             onClick={() => {
               onSelect(name);
@@ -59,12 +107,15 @@ export function ReportSidebar({
           <button
             key={h}
             onClick={() => {
+              onClose();
               onDomain(h);
               onSelect("Overview");
             }}
           >
-            {h}
-            <span>sample</span>
+            <span className="history-domain" title={h}>
+              {h}
+            </span>
+            <span className="history-label">sample</span>
           </button>
         ))}
       </div>

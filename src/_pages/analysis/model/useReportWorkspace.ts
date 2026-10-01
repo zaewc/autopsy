@@ -31,6 +31,14 @@ export function useReportWorkspace(initialDomain: string) {
       if (copyTimer.current) clearTimeout(copyTimer.current);
     };
   }, []);
+  useEffect(() => {
+    const viewport = window.matchMedia("(max-width: 800px)");
+    function closeDesktopNavigation() {
+      if (!viewport.matches) setSidebar(false);
+    }
+    viewport.addEventListener("change", closeDesktopNavigation);
+    return () => viewport.removeEventListener("change", closeDesktopNavigation);
+  }, []);
   const completeScan = useCallback((next: AnalysisReport) => {
     setDomain(next.domain);
     setHistory((old) =>

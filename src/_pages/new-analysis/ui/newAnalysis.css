@@ -1,50 +1,73 @@
 .landing {
   min-height: 100vh;
-  background-image: radial-gradient(#303b33 0.7px, transparent 0.7px);
-  background-size: 24px 24px;
+  background: var(--bg);
 }
 .landing > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 28px 5%;
+  gap: 20px;
+  padding: var(--space-6) 5%;
   border-bottom: 1px solid var(--line);
-  background: var(--bg);
 }
 .landing > header > a:last-child {
-  font: 11px var(--mono);
-  color: var(--green);
-}
-.landing > main {
-  padding: 80px 20px 50px;
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 44px;
   display: flex;
   align-items: center;
-  flex-direction: column;
+}
+.landing > header > a:last-child:hover {
+  color: var(--text);
+}
+.landing > main {
+  padding: 64px var(--space-6);
+  max-width: 860px;
+  margin: auto;
 }
 .landing .analysis-modal {
-  box-shadow: 0 20px 90px #0005;
+  max-width: none;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
-.landing-note {
-  font: 9px var(--mono);
-  letter-spacing: 1.5px;
-  color: #7f9284;
-  margin-top: 28px;
-  text-align: center;
+.landing .analysis-modal h2 {
+  font-size: clamp(36px, 4.5vw, 58px);
+  max-width: 16ch;
+  margin-bottom: var(--space-6);
 }
-@media (max-width: 700px) {
-  .landing > main {
-    padding: 45px 15px;
-  }
+.landing .analysis-content > p {
+  max-width: 60ch;
+  font-size: 16px;
+}
+.landing .analysis-modal form {
+  margin-top: var(--space-8);
+}
+.landing .analysis-content .architecture {
+  margin-top: 40px;
+}
+@media (max-width: 600px) {
   .landing > header {
-    padding: 20px 15px;
+    padding: var(--space-4) 20px;
+    gap: var(--space-4);
   }
   .landing > header > a:last-child {
-    font-size: 8px;
+    font-size: 12px;
+    max-width: 135px;
+    text-align: right;
   }
-  .landing .brand {
-    font-size: 21px;
+  .landing > main {
+    padding: 40px 20px;
   }
-  .landing-note {
-    font-size: 7px;
+  .landing .analysis-modal h2 {
+    font-size: 38px;
+  }
+  .landing .analysis-content > p {
+    font-size: 14px;
+  }
+  .landing .analysis-content .architecture {
+    margin-top: 28px;
   }
 }

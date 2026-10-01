@@ -5,28 +5,28 @@ import "./architecture.css";
 const NODES = [
   {
     name: "Browser",
-    label: "CLIENT",
+    label: "Client",
     icon: Globe,
     evidence:
       "Observed in this sample: document, script, stylesheet, image, and font requests originate in the browser.",
   },
   {
     name: "Cloudflare",
-    label: "EDGE / CDN",
+    label: "Edge / CDN",
     icon: Network,
     evidence:
       "Observed in this sample: a cf-ray response header indicates Cloudflare handled the public response.",
   },
   {
     name: "Next.js",
-    label: "APPLICATION",
+    label: "Application",
     icon: Layers,
     evidence:
       "Observed in this sample: /_next/static resource paths identify the public application framework. Its private hosting topology is unknown.",
   },
   {
     name: "External API",
-    label: "INFERRED",
+    label: "Inferred",
     icon: GitBranch,
     evidence:
       "Inferred only: client integration signals suggest an external service. Its server, database, and internal topology cannot be determined from this sample.",

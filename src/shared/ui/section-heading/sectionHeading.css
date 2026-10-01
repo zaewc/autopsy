@@ -2,23 +2,33 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 15px;
-  gap: 12px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 .section-title h2 {
   margin: 0;
-  font-size: 13px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  font-size: 16px;
+  font-weight: 550;
+  letter-spacing: -0.02em;
+  line-height: 1.5;
 }
-.section-title h2 > span {
-  font: 9px var(--mono);
-  color: #6c7275;
-}
-@media (max-width: 700px) {
+@media (max-width: 600px) {
+  .section-title {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
   .section-title h2 {
+    font-size: 16px;
+  }
+  .section-title .muted-caption {
     font-size: 12px;
+  }
+  .findings-section .section-title {
+    align-items: center;
+  }
+  .filter-buttons {
+    margin-left: -var(--space-3);
   }
 }

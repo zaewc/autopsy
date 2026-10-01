@@ -19,7 +19,7 @@ test("report exploration and URL scan demonstration", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "JavaScript payload could be smaller" }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: "New analysis" }).click();
+  await page.getByRole("button", { name: "New analysis", exact: true }).click();
   await page.getByRole("textbox", { name: "Website URL" }).fill("invalid");
   await page.getByRole("button", { name: "Open sample", exact: true }).click();
   await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
@@ -36,7 +36,10 @@ test("report exploration and URL scan demonstration", async ({ page }) => {
       exact: true,
     }),
   ).toBeVisible();
-  await page.getByRole("tab", { name: "Security", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Report sections" })
+    .getByRole("button", { name: "Security", exact: true })
+    .click();
   await expect(
     page.getByText("Header absent from sample response"),
   ).toBeVisible();
@@ -56,7 +59,9 @@ test("desktop and mobile layouts fit the viewport", async ({ page }) => {
     ).toBeTruthy();
     if (width === 390) {
       await page.getByRole("button", { name: "Toggle navigation" }).click();
-      await page.getByRole("button", { name: "New analysis" }).click();
+      await page
+        .getByRole("button", { name: "New analysis", exact: true })
+        .click();
       await expect(page.getByRole("dialog")).toBeVisible();
       await page.getByRole("button", { name: "Close new analysis" }).click();
     }
@@ -89,6 +94,7 @@ test("keyboard navigation, dialog cancellation, and evidence are accessible", as
   page,
 }) => {
   await page.goto("/");
+  await page.setViewportSize({ width: 390, height: 900 });
   await page.getByRole("tab", { name: "Overview", exact: true }).focus();
   await page.keyboard.press("ArrowRight");
   await expect(
@@ -107,4 +113,63 @@ test("keyboard navigation, dialog cancellation, and evidence are accessible", as
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "linear.app",
   );
+});
+
+test("long domains and entry forms fit narrow viewports", async ({ page }) => {
+  const domain = `${"a".repeat(60)}.${"b".repeat(60)}.example.com`;
+  for (const width of [320, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto(`/?site=${domain}`);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(domain);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBeTruthy();
+    await page.goto("/new");
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBeTruthy();
+    await page.getByRole("textbox", { name: "Website URL" }).fill("invalid");
+    await page
+      .getByRole("button", { name: "Open sample", exact: true })
+      .click();
+    await expect(
+      page.getByText("Enter a valid website URL, such as example.com."),
+    ).toBeVisible();
+  }
+});
+
+test("mobile navigation restores focus and reduced motion preserves readable evidence", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const toggle = page.getByRole("button", { name: "Toggle navigation" });
+  await toggle.click();
+  await expect(
+    page
+      .getByRole("complementary", { name: "Report navigation" })
+      .getByRole("button", { name: "Close navigation" }),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(toggle).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: "New analysis", exact: true }),
+  ).toBeHidden();
+  await page.getByRole("button", { name: /JavaScript payload/ }).click();
+  await expect(
+    page.getByRole("heading", { name: "Suggested improvement" }),
+  ).toBeVisible();
+  expect(
+    await page
+      .locator(".report-tabs")
+      .evaluate((element) => getComputedStyle(element).transitionDuration),
+  ).toBe("0s");
+  await toggle.click();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await expect(page.locator(".workspace")).not.toHaveAttribute("inert", "");
 });
