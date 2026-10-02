@@ -31,6 +31,8 @@ Both stages only reach public internet addresses on ports 80 and 443. The HTML f
 
 The server needs a Chromium build for the browser stage: run `npx playwright install chromium`. Set `AUTOPSY_BROWSER_SCAN=0` to turn the stage off on servers without it.
 
+The interface is available in English and Korean. The language follows the browser's `Accept-Language` until the language button in the top bar saves a choice (`autopsy-locale` cookie). Live scans write their notices, checks, findings, and security issues in the language in use when the scan ran, and exports keep that text; protocol, header, metric, and product names stay in English.
+
 `/` without a URL shows an illustrative sample report that is not attributed to any website. Recent scans are held in memory for the current session. JSON exports keep the `sample` or `live` designation.
 
 ## Architecture and checks

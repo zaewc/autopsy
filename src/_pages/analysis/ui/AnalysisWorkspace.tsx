@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { AnalysisReport } from "@/entities/analysis-report";
 import { AnalysisForm } from "@/features/run-analysis";
+import { LocaleSwitch } from "@/features/switch-locale";
 import {
   useLocale,
   useMessages,
@@ -187,8 +188,9 @@ export function AnalysisWorkspace({
             <Globe size={13} />
             <span className="topbar-title">{title}</span>
           </div>
-          {scan.status === "idle" && (
-            <div>
+          <div>
+            <LocaleSwitch />
+            {scan.status === "idle" && (
               <button
                 className="icon-button"
                 aria-label={t.copy}
@@ -196,8 +198,8 @@ export function AnalysisWorkspace({
               >
                 {copied ? <Check size={16} /> : <Copy size={16} />}
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </header>
         <main>
           {scan.status !== "idle" ? (

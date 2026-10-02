@@ -380,6 +380,46 @@ test("mobile navigation restores focus and reduced motion preserves readable evi
   await expect(page.locator(".workspace")).not.toHaveAttribute("inert", "");
 });
 
+test("language switch keeps the shown report and remembers the choice", async ({
+  page,
+}) => {
+  await page.goto(`/?site=${encodeURIComponent(`${FIXTURE}/next`)}`);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "127.0.0.1 Open 127.0.0.1" }),
+  ).toBeVisible({ timeout: 15000 });
+  await page.getByRole("button", { name: "한국어로 보기" }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "ko");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "127.0.0.1 127.0.0.1 열기" }),
+  ).toBeVisible();
+  await expect(page.getByText("웹사이트 리포트")).toBeVisible();
+  // The live report keeps the language it was scanned in.
+  await expect(page.locator(".report-note")).toContainText(
+    "headless Chromium with scripts running",
+  );
+  await page.goto("/new");
+  await expect(
+    page.getByRole("heading", { name: "웹을 현미경으로 들여다보세요." }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Switch to English" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Put the web under a microscope." }),
+  ).toBeVisible();
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Sample report" }),
+  ).toBeVisible();
+  for (const width of [1440, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBeTruthy();
+    await page.screenshot({ path: `/tmp/autopsy-switch-${width}.png` });
+  }
+});
+
 test.describe("Korean locale", () => {
   test.use({ locale: "ko-KR" });
 

@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnalysisForm } from "@/features/run-analysis";
+import { LocaleSwitch } from "@/features/switch-locale";
 import { useMessages, type Localized } from "@/shared/lib/i18n";
 import { toSiteParam } from "@/shared/lib/web-url";
 import { BrandMark } from "@/shared/ui/brand-mark";
@@ -25,7 +26,10 @@ export function NewAnalysisPage() {
           <BrandMark />
           autopsy
         </Link>
-        <Link href="/">{t.sample}</Link>
+        <div className="landing-links">
+          <LocaleSwitch />
+          <Link href="/">{t.sample}</Link>
+        </div>
       </header>
       <main>
         <div className="analysis-modal">
