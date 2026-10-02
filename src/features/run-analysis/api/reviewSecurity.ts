@@ -14,6 +14,7 @@ import {
   type SecurityTxt,
   type Technology,
 } from "@/entities/analysis-report";
+import type { Locale } from "@/shared/lib/i18n";
 import { queryOsv } from "@/shared/lib/osv/index.server";
 import {
   fetchPublicDocument,
@@ -96,12 +97,14 @@ export async function reviewSecurity({
   rendered,
   browser,
   signal,
+  locale,
 }: {
   document: PublicDocument;
   technologies: readonly Technology[];
   rendered: RenderedSignals | null;
   browser: BrowserObservation | null;
   signal?: AbortSignal;
+  locale?: Locale;
 }): Promise<SecurityReport> {
   const origin = new URL(document.url).origin;
   const response = analyzeSecurity({
@@ -109,6 +112,7 @@ export async function reviewSecurity({
     headers: document.headers,
     setCookies: document.setCookies,
     tls: document.tls,
+    locale,
   });
   const content = analyzeContent({
     url: document.url,
