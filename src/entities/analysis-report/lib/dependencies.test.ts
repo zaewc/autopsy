@@ -87,3 +87,30 @@ describe("dependencies", () => {
     expect(issue.fix).toMatch(/^Upgrade jquery to 3\.5\.1 or later/);
   });
 });
+
+describe("dependencyIssues in Korean", () => {
+  it("translates the title, evidence, and fix", () => {
+    const [issue] = dependencyIssues(
+      [
+        {
+          technology: "jQuery",
+          packageName: "jquery",
+          version: "3.4.1",
+          id: "GHSA-1",
+          aliases: ["CVE-2020-11022"],
+          summary: null,
+          severity: "medium",
+          fixed: "3.5.0",
+          url: "https://osv.dev/vulnerability/GHSA-1",
+        },
+      ],
+      "ko",
+    );
+    expect(issue.title).toBe("jQuery 3.4.1에 알려진 취약점 1개");
+    expect(issue.evidence).toContain(
+      "jquery@3.4.1가 CVE-2020-11022에 해당합니다",
+    );
+    expect(issue.impact).toBe("영향받는 기능과 조건은 advisory를 확인하세요.");
+    expect(issue.fix).toMatch(/^jquery를 3\.5\.0 이상으로/);
+  });
+});

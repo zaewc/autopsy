@@ -118,6 +118,7 @@ export async function reviewSecurity({
     url: document.url,
     html: rendered?.html ?? document.body,
     requests: browser?.requests,
+    locale,
   });
   const [dependencies, contact] = await Promise.all([
     knownVulnerabilities(technologies),
@@ -126,8 +127,10 @@ export async function reviewSecurity({
   const issues: SecurityIssue[] = [
     ...response.issues,
     ...content.issues,
-    ...dependencyIssues(dependencies.vulnerabilities),
-    ...(contact === undefined ? [] : securityTxtIssues(origin, contact)),
+    ...dependencyIssues(dependencies.vulnerabilities, locale),
+    ...(contact === undefined
+      ? []
+      : securityTxtIssues(origin, contact, locale)),
   ].sort((a, b) => RANK[a.severity] - RANK[b.severity]);
   return {
     issues,
