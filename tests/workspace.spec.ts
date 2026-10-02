@@ -491,7 +491,7 @@ test.describe("Korean locale", () => {
     await expect(page.locator(".technology-basis").first()).toHaveText("관측");
     await sections.getByRole("button", { name: /^발견 사항/ }).click();
     await page
-      .getByRole("button", { name: /JavaScript payload could be smaller/ })
+      .getByRole("button", { name: /JavaScript payload를 줄일 수 있습니다/ })
       .click();
     await expect(
       page.getByRole("heading", { name: "개선 제안" }),
@@ -501,11 +501,17 @@ test.describe("Korean locale", () => {
     await expect(
       page.getByRole("button", { name: /JavaScript payload/ }),
     ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", {
+        name: /Content Security Policy가 설정되지 않았습니다/,
+      }),
+    ).toBeVisible();
     await sections.getByRole("button", { name: "보안", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "보안 점검" }),
     ).toBeVisible();
     await expect(page.locator(".audit-table")).toContainText("검토 필요");
+    await expect(page.getByText("샘플 응답에 헤더가 없습니다")).toBeVisible();
     await sections
       .getByRole("button", { name: "아키텍처", exact: true })
       .click();

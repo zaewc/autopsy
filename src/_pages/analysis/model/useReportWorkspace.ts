@@ -1,11 +1,11 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   createSampleReport,
   type AnalysisReport,
 } from "@/entities/analysis-report";
 import { useWebsiteScan } from "@/features/run-analysis";
-import { useMessages, type Localized } from "@/shared/lib/i18n";
+import { useLocale, useMessages, type Localized } from "@/shared/lib/i18n";
 import { normalizeHttpUrl, toSiteParam } from "@/shared/lib/web-url";
 import type { ReportSection } from "../config/reportSections";
 
@@ -27,7 +27,11 @@ function siteHref(report: AnalysisReport) {
 export function useReportWorkspace(initialSite: string | null) {
   const t = useMessages(MESSAGES);
   const [active, setActive] = useState<ReportSection>("Overview");
-  const [report, setReport] = useState<AnalysisReport>(createSampleReport);
+  const locale = useLocale();
+  // Null shows the sample, rebuilt in the current locale.
+  const [live, setReport] = useState<AnalysisReport | null>(null);
+  const sample = useMemo(() => createSampleReport(locale), [locale]);
+  const report = live ?? sample;
   const [modal, setModal] = useState(false);
   const [sidebar, setSidebar] = useState(false);
   const [history, setHistory] = useState<AnalysisReport[]>([]);
@@ -35,7 +39,7 @@ export function useReportWorkspace(initialSite: string | null) {
   const [error, setError] = useState("");
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const show = useCallback((next: AnalysisReport) => {
-    setReport(next);
+    setReport(next.mode === "sample" ? null : next);
     setActive("Overview");
     window.history.replaceState(null, "", siteHref(next));
   }, []);
