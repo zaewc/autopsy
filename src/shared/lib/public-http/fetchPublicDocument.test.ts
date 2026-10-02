@@ -7,6 +7,7 @@ import { fetchPublicDocument, PublicFetchError } from "./fetchPublicDocument";
 let server: Server;
 let base: string;
 let port: string;
+const connections: (string | undefined)[] = [];
 const local = () => ({
   isAllowedAddress: (address: string) => address === "127.0.0.1",
   allowedPorts: [port],
@@ -15,6 +16,7 @@ const local = () => ({
 beforeAll(async () => {
   server = createServer((request, response) => {
     const path = request.url ?? "/";
+    connections.push(request.headers.connection);
     if (path === "/page") {
       response.setHeader("x-powered-by", "Test");
       response.setHeader("set-cookie", ["a=1", "b=2"]);
@@ -54,6 +56,12 @@ async function failure(promise: Promise<unknown>) {
 }
 
 describe("fetchPublicDocument", () => {
+  it("does not keep idle sockets that the server may close", async () => {
+    connections.length = 0;
+    await fetchPublicDocument(`${base}/redirect`, local());
+    expect(connections).toEqual(["close", "close"]);
+  });
+
   it("returns the status, headers, decoded body, and timing", async () => {
     const document = await fetchPublicDocument(`${base}/page`, local());
     expect(document.status).toBe(200);
