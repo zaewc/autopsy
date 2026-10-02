@@ -161,6 +161,7 @@ export async function scanWebsite(
   const technologies = detectTechnologies({
     ...signals,
     rendered: observed.rendered,
+    locale,
   });
   const security = await reviewSecurity({
     document,

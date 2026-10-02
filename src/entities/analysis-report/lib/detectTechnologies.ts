@@ -1,3 +1,4 @@
+import type { Locale, Localized } from "@/shared/lib/i18n";
 import type { Technology } from "../model/types";
 import type { RuntimeSignals } from "./runtimeProbe";
 
@@ -14,6 +15,7 @@ export interface DocumentSignals {
   headers: Readonly<Record<string, string>>;
   html: string;
   rendered?: RenderedSignals | null;
+  locale?: Locale;
 }
 
 type Signal =
@@ -681,6 +683,34 @@ const INFERRED_TYPES: Readonly<Record<string, string>> = {
   Svelte: "UI library",
 };
 
+/** Evidence sentences; signal labels such as window.Intercom stay as written. */
+const en = {
+  header: (name: string, value: string) => `Response header ${name}: ${value}`,
+  html: (label: string, where: string, match: string) =>
+    `${label} in ${where}: ${match}`,
+  document: "the HTML document",
+  dom: "the rendered DOM",
+  request: "a network request",
+  runtime: (label: string, value: string) =>
+    `${label} after scripts ran${value ? `: ${value}` : ""}`,
+  inferred: (name: string, base: string) =>
+    `Inferred because ${name} is built on ${base}; no direct ${base} signal was found.`,
+};
+const MESSAGES: Localized<typeof en> = {
+  en,
+  ko: {
+    header: (name, value) => `응답 헤더 ${name}: ${value}`,
+    html: (label, where, match) => `${where}의 ${label}: ${match}`,
+    document: "HTML 문서",
+    dom: "렌더링된 DOM",
+    request: "네트워크 요청",
+    runtime: (label, value) =>
+      `스크립트 실행 후 ${label}${value ? `: ${value}` : ""}`,
+    inferred: (name, base) =>
+      `${name}가 ${base} 기반이므로 추론했습니다. ${base}의 직접 신호는 찾지 못했습니다.`,
+  },
+};
+
 function excerpt(text: string) {
   const compact = text.replace(/\s+/g, " ").trim();
   return compact.length > 120 ? `${compact.slice(0, 117)}…` : compact;
@@ -696,7 +726,7 @@ function technology(rule: Rule, version: string, evidence: string): Technology {
   };
 }
 
-function matchHtml(rule: Rule, html: string, where: string) {
+function matchHtml(rule: Rule, html: string, where: string, t: typeof en) {
   for (const signal of rule.signals) {
     if (!("html" in signal)) continue;
     const found = html.match(signal.html);
@@ -704,7 +734,7 @@ function matchHtml(rule: Rule, html: string, where: string) {
       return technology(
         rule,
         found[1] ?? "",
-        `${signal.label} in ${where}: ${excerpt(found[0])}`,
+        t.html(signal.label, where, excerpt(found[0])),
       );
   }
   return null;
@@ -715,6 +745,7 @@ function match(
   rule: Rule,
   { headers, html, rendered }: DocumentSignals,
   requested: string,
+  t: typeof en,
 ): Technology | null {
   for (const signal of rule.signals) {
     if (!("header" in signal)) continue;
@@ -725,12 +756,12 @@ function match(
       return technology(
         rule,
         signal.pattern ? (found[1] ?? "") : "",
-        `Response header ${signal.header}: ${excerpt(value)}`,
+        t.header(signal.header, excerpt(value)),
       );
   }
-  const inDocument = matchHtml(rule, html, "the HTML document");
+  const inDocument = matchHtml(rule, html, t.document, t);
   if (inDocument || !rendered) return inDocument;
-  const inDom = matchHtml(rule, rendered.html, "the rendered DOM");
+  const inDom = matchHtml(rule, rendered.html, t.dom, t);
   if (inDom) return inDom;
   for (const signal of rule.signals) {
     if (!("runtime" in signal)) continue;
@@ -739,10 +770,10 @@ function match(
       return technology(
         rule,
         value === "present" ? "" : value,
-        `${signal.label} after scripts ran${value === "present" ? "" : `: ${value}`}`,
+        t.runtime(signal.label, value === "present" ? "" : value),
       );
   }
-  return matchHtml(rule, requested, "a network request");
+  return matchHtml(rule, requested, t.request, t);
 }
 
 /**
@@ -750,12 +781,13 @@ function match(
  * browser observed after running the page's scripts.
  */
 export function detectTechnologies(document: DocumentSignals): Technology[] {
+  const t = MESSAGES[document.locale ?? "en"];
   // Requested URLs are matched like asset attributes.
   const requested = (document.rendered?.requests ?? [])
     .map((url) => `src="${url}"`)
     .join("\n");
   const found = ALL_RULES.flatMap(
-    (rule) => match(rule, document, requested) ?? [],
+    (rule) => match(rule, document, requested, t) ?? [],
   );
   const names = new Set(found.map(({ name }) => name));
   const inferred: Technology[] = [];
@@ -768,7 +800,7 @@ export function detectTechnologies(document: DocumentSignals): Technology[] {
         name: base,
         version: "",
         type: INFERRED_TYPES[base] ?? "Library",
-        evidence: `Inferred because ${technology.name} is built on ${base}; no direct ${base} signal was found.`,
+        evidence: t.inferred(technology.name, base),
         basis: "Inferred",
       });
     }
