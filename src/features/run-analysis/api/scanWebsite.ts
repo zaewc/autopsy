@@ -8,6 +8,7 @@ import {
   type RenderedSignals,
   type ScannedDocument,
 } from "@/entities/analysis-report";
+import type { Locale } from "@/shared/lib/i18n";
 import {
   fetchPublicDocument,
   PublicFetchError,
@@ -20,6 +21,7 @@ import {
 } from "@/shared/lib/rendered-page/index.server";
 import { normalizeHttpUrl } from "@/shared/lib/web-url";
 import { reviewSecurity } from "./reviewSecurity";
+import { SCAN_MESSAGES, type ScanMessages } from "./scanMessages";
 import { testFixtureOptions } from "./testFixture";
 
 export type ScanFailure = FetchFailure | "not-html";
@@ -46,30 +48,27 @@ function countResources(html: string): ScannedDocument["resources"] {
 }
 
 /** Cookie values are the visitor's session data, not technical evidence. */
-function publicHeaders(headers: PublicDocument["headers"]) {
+function publicHeaders(headers: PublicDocument["headers"], t: ScanMessages) {
   const result = { ...headers };
   if (result["set-cookie"])
-    result["set-cookie"] =
-      `${result["set-cookie"].split(/,(?=\s*[^;,=\s]+=)/).length} cookie(s); values omitted`;
+    result["set-cookie"] = t.cookies(
+      result["set-cookie"].split(/,(?=\s*[^;,=\s]+=)/).length,
+    );
   return result;
 }
 
-function notice(document: PublicDocument, browserIssue: string | null) {
-  const parts = browserIssue
-    ? [
-        `Browser stage unavailable: ${browserIssue} Results come from the HTML response only; scripts were not executed, so client-rendered technologies and browser metrics are not included.`,
-      ]
-    : [
-        "The autopsy server fetched the HTML response and loaded the page in headless Chromium with scripts running. Timings are lab values from that server (desktop viewport, no throttling); interaction latency is not measured. Security, accessibility, and SEO checks read the HTML response.",
-      ];
+function notice(
+  document: PublicDocument,
+  browserIssue: string | null,
+  t: ScanMessages,
+) {
+  const parts = [
+    browserIssue ? t.browserUnavailable(browserIssue) : t.browserRan,
+  ];
   if (document.status < 200 || document.status >= 300)
-    parts.push(
-      `The site answered with HTTP ${document.status}; results describe that response, which may be an error or bot-protection page rather than the site itself.`,
-    );
+    parts.push(t.status(document.status));
   if (document.truncated)
-    parts.push(
-      `Only the first ${Math.round(document.bytes / 1000)} kB of the HTML document were inspected.`,
-    );
+    parts.push(t.truncated(Math.round(document.bytes / 1000)));
   return parts.join(" ");
 }
 
@@ -79,6 +78,7 @@ const browserEnabled = () => process.env.AUTOPSY_BROWSER_SCAN !== "0";
 async function observeInBrowser(
   url: string,
   signal: AbortSignal | undefined,
+  t: ScanMessages,
 ): Promise<
   | { rendered: RenderedSignals; browser: BrowserObservation; issue: null }
   | { rendered: null; browser: null; issue: string }
@@ -87,7 +87,7 @@ async function observeInBrowser(
     return {
       rendered: null,
       browser: null,
-      issue: "It is turned off on this server.",
+      issue: t.browserOff,
     };
   try {
     const page = await renderPage(url, {
@@ -112,15 +112,14 @@ async function observeInBrowser(
       issue: null,
     };
   } catch (error) {
-    if (signal?.aborted)
-      throw new ScanError("aborted", "The scan was cancelled.");
+    if (signal?.aborted) throw new ScanError("aborted", t.cancelled);
     return {
       rendered: null,
       browser: null,
       issue:
         error instanceof RenderError
-          ? error.message
-          : "The page could not be loaded in the browser.",
+          ? (t.renderFailure?.(error.code) ?? error.message)
+          : t.browserFailed,
     };
   }
 }
@@ -131,14 +130,11 @@ async function observeInBrowser(
  */
 export async function scanWebsite(
   input: string,
-  { signal }: { signal?: AbortSignal } = {},
+  { signal, locale = "en" }: { signal?: AbortSignal; locale?: Locale } = {},
 ): Promise<AnalysisReport> {
+  const t = SCAN_MESSAGES[locale];
   const target = normalizeHttpUrl(input);
-  if (!target)
-    throw new ScanError(
-      "invalid-url",
-      "Enter a valid website URL, such as example.com.",
-    );
+  if (!target) throw new ScanError("invalid-url", t.invalidUrl);
   let document: PublicDocument;
   try {
     document = await fetchPublicDocument(target, {
@@ -147,18 +143,21 @@ export async function scanWebsite(
     });
   } catch (error) {
     if (error instanceof PublicFetchError)
-      throw new ScanError(error.code, error.message);
+      throw new ScanError(
+        error.code,
+        t.fetchFailure?.(
+          error.code,
+          error.message.match(/\(([A-Z_]+)\)/)?.[1] ?? "",
+        ) ?? error.message,
+      );
     throw error;
   }
   const contentType = document.headers["content-type"] ?? "";
   if (contentType && !/html/i.test(contentType))
-    throw new ScanError(
-      "not-html",
-      `The URL returned ${contentType.split(";")[0]}, not an HTML document.`,
-    );
+    throw new ScanError("not-html", t.notHtml(contentType.split(";")[0]));
   const signals = { headers: document.headers, html: document.body };
   const audit = auditDocument(signals);
-  const observed = await observeInBrowser(document.url, signal);
+  const observed = await observeInBrowser(document.url, signal, t);
   const technologies = detectTechnologies({
     ...signals,
     rendered: observed.rendered,
@@ -175,7 +174,7 @@ export async function scanWebsite(
     domain: target.hostname,
     url: document.url,
     scannedAt: new Date().toISOString(),
-    notice: notice(document, observed.issue),
+    notice: notice(document, observed.issue, t),
     technologies,
     // Warnings first; security before document checks within each severity.
     findings: [...securityFindings(security.issues), ...audit.findings].sort(
@@ -190,7 +189,7 @@ export async function scanWebsite(
       bytes: document.bytes,
       truncated: document.truncated,
       redirects: document.redirects,
-      headers: publicHeaders(document.headers),
+      headers: publicHeaders(document.headers, t),
       resources: countResources(document.body),
     },
     browser: observed.browser,

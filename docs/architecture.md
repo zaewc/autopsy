@@ -24,6 +24,6 @@ Server-only implementations must use separate `index.server.ts` APIs that import
 
 ## Localization
 
-English and Korean are supported. `shared/lib/i18n` resolves the locale from the `autopsy-locale` cookie, then `Accept-Language`, then English; `requestLocale()` in its server API reads it for layouts and route handlers, and `LocaleProvider`/`useMessages` pass it to client UI. Each slice owns its own `Localized` message tables next to the code that renders them; Shared never holds business copy. Protocol, header, directive, metric, and product names stay in English in every locale.
+English and Korean are supported. `shared/lib/i18n` resolves the locale from the `autopsy-locale` cookie, then `Accept-Language`, then English; `requestLocale()` in its server API reads it for layouts and route handlers, and `LocaleProvider`/`useMessages` pass it to client UI. Each slice owns its own `Localized` message tables next to the code that renders them; Shared never holds business copy. `/api/scan` writes server-generated report text (notices, errors, findings) in the request's locale, so a report keeps the language it was scanned in, including in exports. Protocol, header, directive, metric, and product names stay in English in every locale.
 
 Component styles are colocated with their owning UI modules. `_app/styles` contains only global foundations and design primitives. The Widgets layer is intentionally absent: no composed widget is shared by these two screens. Report export remains page-local because only the report page owns that action.

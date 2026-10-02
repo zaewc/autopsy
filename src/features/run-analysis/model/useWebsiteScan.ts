@@ -1,6 +1,21 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AnalysisReport } from "@/entities/analysis-report";
+import { useMessages, type Localized } from "@/shared/lib/i18n";
+
+const MESSAGES: Localized<{
+  failed: (status: number) => string;
+  unreachable: string;
+}> = {
+  en: {
+    failed: (status) => `Scan failed (HTTP ${status}).`,
+    unreachable: "The scan service could not be reached. Try again.",
+  },
+  ko: {
+    failed: (status) => `스캔에 실패했습니다 (HTTP ${status}).`,
+    unreachable: "스캔 서비스에 연결할 수 없습니다. 다시 시도하세요.",
+  },
+};
 
 export type ScanState =
   | { status: "idle" }
@@ -16,6 +31,7 @@ export function useWebsiteScan(
   onComplete: (report: AnalysisReport) => void,
   initialTarget: string | null = null,
 ) {
+  const t = useMessages(MESSAGES);
   const [state, setState] = useState<ScanState>(() =>
     initialTarget
       ? { status: "scanning", target: initialTarget }
@@ -40,8 +56,7 @@ export function useWebsiteScan(
           return setState({
             status: "error",
             target,
-            message:
-              body?.error?.message ?? `Scan failed (HTTP ${response.status}).`,
+            message: body?.error?.message ?? t.failed(response.status),
           });
         setState({ status: "idle" });
         onComplete(body as AnalysisReport);
@@ -50,11 +65,11 @@ export function useWebsiteScan(
         setState({
           status: "error",
           target,
-          message: "The scan service could not be reached. Try again.",
+          message: t.unreachable,
         });
       }
     },
-    [onComplete],
+    [onComplete, t],
   );
   const cancel = useCallback(() => {
     controller.current?.abort();
