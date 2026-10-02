@@ -585,6 +585,21 @@ test.describe("Korean locale", () => {
     await expect(
       page.getByText("최종 URL: http://127.0.0.1:3101/next"),
     ).toBeVisible();
+    await page
+      .getByRole("navigation", { name: "리포트 섹션" })
+      .getByRole("button", { name: "기술", exact: true })
+      .click();
+    await page
+      .locator(".technology-list")
+      .getByRole("button", { name: /^Next\.js/ })
+      .click();
+    await expect(
+      page.getByText("응답 헤더 x-powered-by: Next.js"),
+    ).toBeVisible();
+    await page
+      .getByRole("navigation", { name: "리포트 섹션" })
+      .getByRole("button", { name: "보안", exact: true })
+      .click();
     await expect(
       page.getByRole("row", { name: /sid 아니요 아니요 설정 안 됨/ }),
     ).toBeVisible();

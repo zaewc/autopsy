@@ -195,3 +195,32 @@ describe("detectTechnologies", () => {
     });
   });
 });
+
+describe("detectTechnologies in Korean", () => {
+  it("writes evidence sentences in Korean and keeps detections", () => {
+    const input = {
+      headers: { "x-powered-by": "Next.js" },
+      html: '<script src="/_next/static/chunks/main.js"></script>',
+      rendered: {
+        html: "",
+        requests: [],
+        runtime: { alpine: "3.13.0" },
+      },
+    };
+    const english = detectTechnologies(input);
+    const korean = detectTechnologies({ ...input, locale: "ko" });
+    expect(korean.map(({ name, type, basis }) => [name, type, basis])).toEqual(
+      english.map(({ name, type, basis }) => [name, type, basis]),
+    );
+    const evidence = Object.fromEntries(
+      korean.map(({ name, evidence }) => [name, evidence]),
+    );
+    expect(evidence["Next.js"]).toBe("응답 헤더 x-powered-by: Next.js");
+    expect(evidence["Alpine.js"]).toBe(
+      "스크립트 실행 후 window.Alpine: 3.13.0",
+    );
+    expect(evidence.React).toBe(
+      "Next.js가 React 기반이므로 추론했습니다. React의 직접 신호는 찾지 못했습니다.",
+    );
+  });
+});
