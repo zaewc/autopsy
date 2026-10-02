@@ -397,6 +397,54 @@ test.describe("Korean locale", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
   });
 
+  test("workspace navigation and scan status are in Korean", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 900 });
+    await page.goto("/");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "샘플 리포트" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/실제 웹사이트를 설명하지 않습니다/),
+    ).toBeVisible();
+    await page.getByRole("tab", { name: "개요", exact: true }).focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(
+      page.getByRole("tab", { name: "기술", exact: true }),
+    ).toBeFocused();
+    await page
+      .getByRole("main")
+      .getByRole("button", { name: "새 분석", exact: true })
+      .click();
+    await page
+      .getByRole("textbox", { name: "웹사이트 URL" })
+      .fill(`${FIXTURE}/slow`);
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("status")).toContainText(
+      "headless 브라우저에서 스크립트를 실행한 상태로",
+    );
+    await page.getByRole("button", { name: "취소", exact: true }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "샘플 리포트",
+    );
+    for (const width of [1440, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBeTruthy();
+    }
+    await page.getByRole("button", { name: "탐색 열기/닫기" }).click();
+    await expect(
+      page
+        .getByRole("complementary", { name: "리포트 탐색" })
+        .getByRole("button", { name: "탐색 닫기" }),
+    ).toBeFocused();
+    await page.screenshot({ path: "/tmp/autopsy-ko-nav-320.png" });
+  });
+
   test("URL entry is in Korean and keeps technical terms", async ({ page }) => {
     await page.goto("/new");
     await expect(

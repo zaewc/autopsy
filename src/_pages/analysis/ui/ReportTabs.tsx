@@ -1,4 +1,13 @@
-import { REPORT_SECTIONS, type ReportSection } from "../config/reportSections";
+import { useMessages, type Localized } from "@/shared/lib/i18n";
+import {
+  REPORT_SECTIONS,
+  SECTION_LABELS,
+  type ReportSection,
+} from "../config/reportSections";
+const MESSAGES: Localized<{ view: string }> = {
+  en: { view: "Analysis view" },
+  ko: { view: "분석 보기" },
+};
 export function ReportTabs({
   active,
   onSelect,
@@ -6,8 +15,10 @@ export function ReportTabs({
   active: ReportSection;
   onSelect: (name: ReportSection) => void;
 }) {
+  const t = useMessages(MESSAGES);
+  const labels = useMessages(SECTION_LABELS);
   return (
-    <div className="report-tabs" role="tablist" aria-label="Analysis view">
+    <div className="report-tabs" role="tablist" aria-label={t.view}>
       {REPORT_SECTIONS.map(({ name }, index) => (
         <button
           key={name}
@@ -35,7 +46,7 @@ export function ReportTabs({
               ?.focus();
           }}
         >
-          {name}
+          {labels[name]}
           {name === "Findings" && <span>3</span>}
         </button>
       ))}
