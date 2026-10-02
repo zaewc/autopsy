@@ -129,6 +129,46 @@ test("live scan reports observed technologies with evidence", async ({
     page.locator(".security-detail", { hasText: "security.txt" }),
   ).toContainText("mailto:security@fixture.test");
   await expect(page.getByText(/fixture-secret/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Reset filters" }).click();
+  const search = page.getByRole("searchbox", { name: "Search issues" });
+  await search.fill("Final URL:");
+  await expect(issue).toBeVisible();
+  await expect(page.locator(".security-result-count")).toContainText("1 of");
+  await search.fill("no-matching-security-evidence");
+  await expect(page.getByText("No issues match these filters.")).toBeVisible();
+  await page.getByRole("button", { name: "Reset filters" }).click();
+  await expect(search).toHaveValue("");
+  await page.getByLabel("Sort by").selectOption("title");
+  const titles = await page
+    .locator(".security-issues .finding-title")
+    .allTextContents();
+  expect(titles).toEqual([...titles].sort((a, b) => a.localeCompare(b)));
+  await page.getByLabel("Category", { exact: true }).selectOption("Transport");
+  await expect(issue).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Security evidence" })
+    .getByRole("link", { name: "Security headers", exact: true })
+    .click();
+  await expect(
+    page.getByRole("region", { name: "Security headers", exact: true }),
+  ).toBeFocused();
+  await page.getByRole("button", { name: "Reset filters" }).click();
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBeTruthy();
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await page.screenshot({
+      path: `/tmp/autopsy-security-${width}.png`,
+      fullPage: true,
+      animations: "disabled",
+    });
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+
   const sections = page.getByRole("navigation", { name: "Report sections" });
   await sections.getByRole("button", { name: "Performance" }).click();
   await expect(page.getByText("HTTP status")).toBeVisible();
