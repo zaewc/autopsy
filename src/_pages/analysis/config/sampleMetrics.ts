@@ -5,7 +5,7 @@ export const SAMPLE_VITALS = [
     short: "LCP",
     value: "1.2",
     unit: "s",
-    caption: "Good",
+    rating: "good",
     limit: "≤ 2.5 s",
   },
   {
@@ -13,7 +13,7 @@ export const SAMPLE_VITALS = [
     short: "INP",
     value: "84",
     unit: "ms",
-    caption: "Good",
+    rating: "good",
     limit: "≤ 200 ms",
   },
   {
@@ -21,7 +21,7 @@ export const SAMPLE_VITALS = [
     short: "CLS",
     value: "0.04",
     unit: "",
-    caption: "Good",
+    rating: "good",
     limit: "≤ 0.1",
   },
   {
@@ -29,7 +29,7 @@ export const SAMPLE_VITALS = [
     short: "FCP",
     value: "0.8",
     unit: "s",
-    caption: "Good",
+    rating: "good",
     limit: "≤ 1.8 s",
   },
 ] as const;

@@ -26,13 +26,15 @@ export const LAB_VITALS = [
   },
 ] as const;
 
+export type VitalRating = "good" | "needs-improvement" | "poor";
+
 export function rateVital(
   value: number,
   [good, poor]: readonly [number, number],
-) {
-  if (value <= good) return { label: "Good", tone: "good" };
-  if (value <= poor) return { label: "Needs improvement", tone: "warn" };
-  return { label: "Poor", tone: "warn" };
+): { rating: VitalRating; tone: "good" | "warn" } {
+  if (value <= good) return { rating: "good", tone: "good" };
+  if (value <= poor) return { rating: "needs-improvement", tone: "warn" };
+  return { rating: "poor", tone: "warn" };
 }
 
 export function displayVital(

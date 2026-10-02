@@ -445,6 +445,37 @@ test.describe("Korean locale", () => {
     await page.screenshot({ path: "/tmp/autopsy-ko-nav-320.png" });
   });
 
+  test("report overview summarizes each section in Korean", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const overview = page.getByRole("region", { name: "리포트 개요" });
+    for (const section of ["기술", "성능", "네트워크", "보안", "SEO"])
+      await expect(
+        overview.getByRole("button", { name: new RegExp(`^${section} 열기:`) }),
+      ).toBeVisible();
+    await expect(overview).toContainText("관측된 기술 5개 · 추론 1개");
+    await expect(overview).toContainText("경고 2개 · 정보 1개");
+    await expect(overview).toContainText("LCP");
+    await expect(overview).toContainText("좋음");
+    await page.goto(`/?site=${encodeURIComponent(`${FIXTURE}/next`)}`);
+    await expect(
+      overview.getByRole("button", { name: /^보안 열기: 높음 \d+개/ }),
+    ).toBeVisible({ timeout: 15000 });
+    for (const width of [1440, 320]) {
+      await page.setViewportSize({ width, height: 1000 });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBeTruthy();
+      await page.screenshot({
+        path: `/tmp/autopsy-ko-overview-${width}.png`,
+        fullPage: true,
+      });
+    }
+  });
+
   test("URL entry is in Korean and keeps technical terms", async ({ page }) => {
     await page.goto("/new");
     await expect(

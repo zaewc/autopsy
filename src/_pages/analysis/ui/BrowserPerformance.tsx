@@ -1,5 +1,7 @@
 import type { BrowserObservation } from "@/entities/analysis-report";
+import { useMessages } from "@/shared/lib/i18n";
 import { SectionHeading } from "@/shared/ui/section-heading";
+import { VITAL_RATING_LABELS } from "../config/labels";
 import {
   formatKilobytes,
   formatMs,
@@ -30,6 +32,7 @@ export function BrowserPerformance({
 }: {
   browser: BrowserObservation;
 }) {
+  const ratings = useMessages(VITAL_RATING_LABELS);
   const loaded = browser.requests.filter(
     (request) => request.status !== null && request.durationMs !== null,
   );
@@ -80,7 +83,7 @@ export function BrowserPerformance({
                   {result ? (
                     <>
                       <i />
-                      {result.label}
+                      {ratings[result.rating]}
                     </>
                   ) : (
                     "Not reported"
