@@ -31,6 +31,13 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
+/* Hangul falls back to a system Korean face; keep-all avoids breaking words mid-syllable. */
+:lang(ko) body {
+  font-family:
+    "Avenir Next", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic",
+    "Noto Sans KR", sans-serif;
+  word-break: keep-all;
+}
 button,
 input,
 a {

@@ -7,6 +7,8 @@ export default defineConfig({
   workers: 1,
   use: {
     baseURL: "http://127.0.0.1:3100",
+    // Pin Accept-Language so the UI language does not follow the host system.
+    locale: "en-US",
     channel: process.env.CI ? "chromium" : "chrome",
     trace: "retain-on-failure",
   },
