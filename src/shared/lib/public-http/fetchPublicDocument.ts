@@ -150,6 +150,9 @@ function request(
       url,
       {
         signal,
+        // A pooled socket can be closed by the server while the browser stage
+        // runs, failing the next request to that host with ECONNRESET.
+        agent: false,
         lookup: createGuardedLookup(options.isAllowedAddress),
         headers: {
           "user-agent": USER_AGENT,
