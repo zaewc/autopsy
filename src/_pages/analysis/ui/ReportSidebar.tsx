@@ -2,8 +2,44 @@
 import { useEffect, useRef } from "react";
 import { Plus, X } from "lucide-react";
 import type { AnalysisReport } from "@/entities/analysis-report";
+import { useLocale, useMessages, type Localized } from "@/shared/lib/i18n";
 import { BrandMark } from "@/shared/ui/brand-mark";
-import { REPORT_SECTIONS, type ReportSection } from "../config/reportSections";
+import {
+  REPORT_SECTIONS,
+  SECTION_LABELS,
+  type ReportSection,
+} from "../config/reportSections";
+const MESSAGES: Localized<{
+  navigation: string;
+  close: string;
+  home: string;
+  newAnalysis: string;
+  workspace: string;
+  sections: string;
+  recent: string;
+  note: string;
+}> = {
+  en: {
+    navigation: "Report navigation",
+    close: "Close navigation",
+    home: "autopsy home",
+    newAnalysis: "New analysis",
+    workspace: "WORKSPACE",
+    sections: "Report sections",
+    recent: "RECENT SCANS",
+    note: "Live scans load each page once in a headless browser.",
+  },
+  ko: {
+    navigation: "리포트 탐색",
+    close: "탐색 닫기",
+    home: "autopsy 홈",
+    newAnalysis: "새 분석",
+    workspace: "작업 공간",
+    sections: "리포트 섹션",
+    recent: "최근 스캔",
+    note: "실제 스캔은 각 페이지를 headless 브라우저에서 한 번 불러옵니다.",
+  },
+};
 interface Props {
   sidebar: boolean;
   active: ReportSection;
@@ -27,6 +63,9 @@ export function ReportSidebar({
   onSelect,
   onReport,
 }: Props) {
+  const t = useMessages(MESSAGES);
+  const labels = useMessages(SECTION_LABELS);
+  const locale = useLocale();
   const asideRef = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!sidebar) return;
@@ -43,7 +82,7 @@ export function ReportSidebar({
     <aside
       ref={asideRef}
       id="report-navigation"
-      aria-label="Report navigation"
+      aria-label={t.navigation}
       className={`sidebar ${sidebar ? "open" : ""}`}
       onKeyDown={(event) => {
         if (!sidebar) return;
@@ -68,12 +107,12 @@ export function ReportSidebar({
     >
       <button
         className="sidebar-close icon-button"
-        aria-label="Close navigation"
+        aria-label={t.close}
         onClick={onClose}
       >
         <X size={18} />
       </button>
-      <a className="brand" href="/new" aria-label="autopsy home">
+      <a className="brand" href="/new" aria-label={t.home}>
         <BrandMark />
         autopsy
       </a>
@@ -85,10 +124,11 @@ export function ReportSidebar({
         }}
       >
         <Plus size={16} />
-        New analysis<kbd aria-hidden="true">⌘ K</kbd>
+        {t.newAnalysis}
+        <kbd aria-hidden="true">⌘ K</kbd>
       </button>
-      <div className="nav-label">WORKSPACE</div>
-      <nav aria-label="Report sections">
+      <div className="nav-label">{t.workspace}</div>
+      <nav aria-label={t.sections}>
         {REPORT_SECTIONS.map(({ name, icon: Icon }) => (
           <button
             key={name}
@@ -101,7 +141,7 @@ export function ReportSidebar({
             }}
           >
             <Icon size={16} />
-            {name}
+            {labels[name]}
             {name === "Findings" && findings !== null && (
               <span className="count">{findings}</span>
             )}
@@ -111,7 +151,7 @@ export function ReportSidebar({
       </nav>
       {history.length > 0 && (
         <div className="recent">
-          <div className="nav-label">RECENT SCANS</div>
+          <div className="nav-label">{t.recent}</div>
           {history.map((report) => (
             <button
               key={report.url}
@@ -126,7 +166,7 @@ export function ReportSidebar({
               </span>
               {report.scannedAt && (
                 <span className="history-label">
-                  {new Date(report.scannedAt).toLocaleTimeString(undefined, {
+                  {new Date(report.scannedAt).toLocaleTimeString(locale, {
                     timeStyle: "short",
                   })}
                 </span>
@@ -136,9 +176,7 @@ export function ReportSidebar({
         </div>
       )}
       <div className="sidebar-bottom">
-        <p className="sidebar-note">
-          Live scans load each page once in a headless browser.
-        </p>
+        <p className="sidebar-note">{t.note}</p>
       </div>
     </aside>
   );

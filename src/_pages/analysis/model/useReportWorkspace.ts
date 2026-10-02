@@ -5,8 +5,19 @@ import {
   type AnalysisReport,
 } from "@/entities/analysis-report";
 import { useWebsiteScan } from "@/features/run-analysis";
+import { useMessages, type Localized } from "@/shared/lib/i18n";
 import { normalizeHttpUrl, toSiteParam } from "@/shared/lib/web-url";
 import type { ReportSection } from "../config/reportSections";
+
+const MESSAGES: Localized<{ clipboard: string }> = {
+  en: {
+    clipboard: "Clipboard access is unavailable. Use Export report instead.",
+  },
+  ko: {
+    clipboard:
+      "클립보드에 접근할 수 없습니다. 대신 리포트 내보내기를 사용하세요.",
+  },
+};
 
 function siteHref(report: AnalysisReport) {
   const url = report.mode === "live" && normalizeHttpUrl(report.url);
@@ -14,6 +25,7 @@ function siteHref(report: AnalysisReport) {
 }
 
 export function useReportWorkspace(initialSite: string | null) {
+  const t = useMessages(MESSAGES);
   const [active, setActive] = useState<ReportSection>("Overview");
   const [report, setReport] = useState<AnalysisReport>(createSampleReport);
   const [modal, setModal] = useState(false);
@@ -90,7 +102,7 @@ export function useReportWorkspace(initialSite: string | null) {
       if (copyTimer.current) clearTimeout(copyTimer.current);
       copyTimer.current = setTimeout(() => setCopied(false), 1800);
     } catch {
-      setError("Clipboard access is unavailable. Use Export report instead.");
+      setError(t.clipboard);
     }
   }
   function download() {
