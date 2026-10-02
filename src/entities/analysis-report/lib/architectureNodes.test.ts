@@ -62,3 +62,22 @@ describe("architectureNodes", () => {
     ).toEqual(["Browser", "Cloudflare", "Next.js", "External API"]);
   });
 });
+
+describe("architectureNodes in Korean", () => {
+  it("translates node names, labels, and evidence but not technology names", () => {
+    const nodes = architectureNodes(
+      live([tech("Vercel", "Hosting"), tech("Nginx", "Web server")]),
+      "ko",
+    );
+    expect(nodes.map(({ name, label }) => `${name}:${label}`)).toEqual([
+      "요청:클라이언트",
+      "Vercel:호스팅",
+      "Nginx:웹 서버",
+      "Origin 서비스:알 수 없음",
+    ]);
+    expect(nodes[0].evidence).toContain("https://site.test/을 요청했습니다");
+    expect(
+      architectureNodes(createSampleReport(), "ko").map(({ name }) => name),
+    ).toEqual(["브라우저", "Cloudflare", "Next.js", "외부 API"]);
+  });
+});
