@@ -379,3 +379,21 @@ test("mobile navigation restores focus and reduced motion preserves readable evi
   await page.setViewportSize({ width: 1440, height: 1000 });
   await expect(page.locator(".workspace")).not.toHaveAttribute("inert", "");
 });
+
+test.describe("Korean locale", () => {
+  test.use({ locale: "ko-KR" });
+
+  test("browser language selects Korean and a saved choice overrides it", async ({
+    page,
+    context,
+  }) => {
+    await page.goto("/new");
+    await expect(page.locator("html")).toHaveAttribute("lang", "ko");
+    await expect(page).toHaveTitle("autopsy — 웹을 현미경 아래에");
+    await context.addCookies([
+      { name: "autopsy-locale", value: "en", url: "http://127.0.0.1:3100" },
+    ]);
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  });
+});
