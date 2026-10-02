@@ -631,6 +631,21 @@ test.describe("Korean locale", () => {
     await expect(page.getByRole("button", { name: "다시 시도" })).toBeVisible();
   });
 
+  test("document checks from a live scan are in Korean", async ({ page }) => {
+    await page.goto(`/?site=${encodeURIComponent(`${FIXTURE}/next`)}`);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "127.0.0.1 127.0.0.1 열기" }),
+    ).toBeVisible({ timeout: 15000 });
+    await page
+      .getByRole("navigation", { name: "리포트 섹션" })
+      .getByRole("button", { name: "SEO", exact: true })
+      .click();
+    await expect(page.locator(".audit-table")).toContainText(
+      "meta description이 없습니다",
+    );
+    await expect(page.locator(".audit-table")).toContainText("페이지 제목");
+  });
+
   test("URL entry is in Korean and keeps technical terms", async ({ page }) => {
     await page.goto("/new");
     await expect(
