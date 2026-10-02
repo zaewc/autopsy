@@ -396,4 +396,26 @@ test.describe("Korean locale", () => {
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
   });
+
+  test("URL entry is in Korean and keeps technical terms", async ({ page }) => {
+    await page.goto("/new");
+    await expect(
+      page.getByRole("heading", { name: "웹을 현미경으로 들여다보세요." }),
+    ).toBeVisible();
+    await expect(page.getByText(/headless 브라우저/)).toBeVisible();
+    await page.getByRole("textbox", { name: "웹사이트 URL" }).fill("invalid");
+    await page.getByRole("button", { name: "분석", exact: true }).click();
+    await expect(page.locator("#url-error")).toHaveText(
+      "example.com 같은 올바른 웹사이트 URL을 입력하세요.",
+    );
+    for (const width of [1440, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBeTruthy();
+    }
+    await page.screenshot({ path: "/tmp/autopsy-ko-new-320.png" });
+  });
 });
