@@ -79,3 +79,26 @@ describe("analyzeContent", () => {
     ).toEqual([]);
   });
 });
+
+describe("analyzeContent in Korean", () => {
+  it("translates issue text and keeps ids and severities", () => {
+    const input = {
+      url: "https://site.test/",
+      html: '<script src="http://cdn.other.test/a.js"></script><img src="http://img.test/a.png"><form action="http://site.test/login"></form>',
+    };
+    const english = analyzeContent(input).issues;
+    const korean = analyzeContent({ ...input, locale: "ko" }).issues;
+    expect(korean.map(({ id, severity }) => [id, severity])).toEqual(
+      english.map(({ id, severity }) => [id, severity]),
+    );
+    expect(korean.map(({ title }) => title)).toEqual([
+      "HTTP로 불러오는 스크립트·데이터 리소스 1개",
+      "HTTP로 불러오는 이미지·미디어 리소스 1개",
+      "integrity 검사가 없는 서드파티 스크립트 1개",
+      "HTTP로 제출되는 form 1개",
+    ]);
+    expect(korean[0].evidence).toBe(
+      "HTML이 참조하는 HTTP URL: http://cdn.other.test/a.js",
+    );
+  });
+});
