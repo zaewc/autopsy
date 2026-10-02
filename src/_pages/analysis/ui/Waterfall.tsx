@@ -1,4 +1,25 @@
+import { useMessages, type Localized } from "@/shared/lib/i18n";
 import { formatCount } from "../lib/formatMetrics";
+const MESSAGES: Localized<{
+  resource: string;
+  timing: (
+    name: string,
+    start: number,
+    duration: number,
+    measured: boolean,
+  ) => string;
+}> = {
+  en: {
+    resource: "Resource",
+    timing: (name, start, duration, measured) =>
+      `${name}: starts at ${start} ms, duration ${duration} ms (${measured ? "measured" : "simulated"})`,
+  },
+  ko: {
+    resource: "리소스",
+    timing: (name, start, duration, measured) =>
+      `${name}: ${start} ms에 시작, ${duration} ms 소요 (${measured ? "측정값" : "예시"})`,
+  },
+};
 export interface WaterfallRequest {
   name: string;
   /** Short label: HTML, JS, CSS, FONT, IMG, XHR, OTHER. */
@@ -18,12 +39,12 @@ export function Waterfall({
   /** False for illustrative sample timings. */
   measured: boolean;
 }) {
+  const t = useMessages(MESSAGES);
   const ticks = [0, 1, 2, 3].map((step) => Math.round((timelineMs * step) / 3));
-  const kind = measured ? "measured" : "simulated";
   return (
     <div className="waterfall">
       <div className="waterfall-scale">
-        <span>Resource</span>
+        <span>{t.resource}</span>
         <div className="waterfall-ticks">
           {ticks.map((tick, index) => (
             <span key={index}>
@@ -46,11 +67,10 @@ export function Waterfall({
                 marginLeft: `${(start / timelineMs) * 100}%`,
                 width: `${Math.max((duration / timelineMs) * 100, 0.5)}%`,
               }}
-              title={`${name}: starts at ${start} ms, duration ${duration} ms (${kind})`}
+              title={t.timing(name, start, duration, measured)}
             />
             <span className="sr-only">
-              {name}: starts at {start} ms, duration {duration} ms; {kind}{" "}
-              timing.
+              {t.timing(name, start, duration, measured)}
             </span>
           </div>
         </div>

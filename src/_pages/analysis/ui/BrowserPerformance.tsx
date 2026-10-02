@@ -1,5 +1,5 @@
 import type { BrowserObservation } from "@/entities/analysis-report";
-import { useMessages } from "@/shared/lib/i18n";
+import { useMessages, type Localized } from "@/shared/lib/i18n";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import { VITAL_RATING_LABELS } from "../config/labels";
 import {
@@ -16,14 +16,51 @@ import {
 import { Waterfall } from "./Waterfall";
 
 const WATERFALL_ROWS = 12;
-const CATEGORY_NAMES: Readonly<Record<string, string>> = {
-  JS: "JavaScript",
-  IMG: "Images",
-  FONT: "Fonts",
-  CSS: "CSS",
-  HTML: "HTML",
-  XHR: "Data requests",
-  OTHER: "Other",
+const MESSAGES: Localized<{
+  title: string;
+  caption: string;
+  notReported: string;
+  waterfall: string;
+  shown: (shown: number, total: number, more: boolean) => string;
+  bodies: string;
+  categories: Readonly<Record<string, string>>;
+}> = {
+  en: {
+    title: "Performance",
+    caption: "Lab values · headless Chromium, desktop, no throttling",
+    notReported: "Not reported",
+    waterfall: "Request waterfall",
+    shown: (shown, total, more) =>
+      `First ${shown} of ${total}${more ? "+" : ""} requests`,
+    bodies: "Response bodies",
+    categories: {
+      JS: "JavaScript",
+      IMG: "Images",
+      FONT: "Fonts",
+      CSS: "CSS",
+      HTML: "HTML",
+      XHR: "Data requests",
+      OTHER: "Other",
+    },
+  },
+  ko: {
+    title: "성능",
+    caption: "lab 값 · headless Chromium, 데스크톱, throttling 없음",
+    notReported: "보고되지 않음",
+    waterfall: "요청 waterfall",
+    shown: (shown, total, more) =>
+      `요청 ${total}${more ? "+" : ""}개 중 처음 ${shown}개`,
+    bodies: "응답 본문",
+    categories: {
+      JS: "JavaScript",
+      IMG: "이미지",
+      FONT: "폰트",
+      CSS: "CSS",
+      HTML: "HTML",
+      XHR: "데이터 요청",
+      OTHER: "기타",
+    },
+  },
 };
 
 /** Lab measurements from loading the page in the scanner's browser. */
@@ -32,6 +69,7 @@ export function BrowserPerformance({
 }: {
   browser: BrowserObservation;
 }) {
+  const t = useMessages(MESSAGES);
   const ratings = useMessages(VITAL_RATING_LABELS);
   const loaded = browser.requests.filter(
     (request) => request.status !== null && request.durationMs !== null,
@@ -58,10 +96,8 @@ export function BrowserPerformance({
     .sort(([, a], [, b]) => b - a);
   return (
     <section>
-      <SectionHeading title="Performance">
-        <span className="muted-caption">
-          Lab values · headless Chromium, desktop, no throttling
-        </span>
+      <SectionHeading title={t.title}>
+        <span className="muted-caption">{t.caption}</span>
       </SectionHeading>
       <div className="vitals">
         {VITALS.map(({ key, name, short, limits }) => {
@@ -86,7 +122,7 @@ export function BrowserPerformance({
                       {ratings[result.rating]}
                     </>
                   ) : (
-                    "Not reported"
+                    t.notReported
                   )}
                 </span>
                 <span>≤ {key === "cls" ? limits[0] : formatMs(limits[0])}</span>
@@ -98,17 +134,21 @@ export function BrowserPerformance({
       <div className="performance-details">
         <div className="requests-panel">
           <div className="subheading">
-            Request waterfall
+            {t.waterfall}
             <span>
-              First {shown.length} of {browser.requests.length}
-              {browser.requestsTruncated ? "+" : ""} requests
+              {t.shown(
+                shown.length,
+                browser.requests.length,
+                browser.requestsTruncated,
+              )}
             </span>
           </div>
           <Waterfall requests={shown} timelineMs={timeline} measured />
         </div>
         <div className="resource-panel">
           <div className="subheading">
-            Response bodies<span>{formatKilobytes(total)}</span>
+            {t.bodies}
+            <span>{formatKilobytes(total)}</span>
           </div>
           <div
             className="resource-stack measured"
@@ -116,7 +156,7 @@ export function BrowserPerformance({
             aria-label={categories
               .map(
                 ([label, bytes]) =>
-                  `${CATEGORY_NAMES[label]} ${Math.round((bytes / total) * 100)}%`,
+                  `${t.categories[label]} ${Math.round((bytes / total) * 100)}%`,
               )
               .join(", ")}
           >
@@ -131,7 +171,7 @@ export function BrowserPerformance({
           {categories.map(([label, bytes]) => (
             <div className="resource-row" key={label}>
               <i className={`resource-color bar-${label}`} />
-              <span>{CATEGORY_NAMES[label]}</span>
+              <span>{t.categories[label]}</span>
               <strong>{formatKilobytes(bytes)}</strong>
               <small>{Math.round((bytes / total) * 100)}%</small>
             </div>
