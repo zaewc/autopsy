@@ -31,7 +31,12 @@ export function useWebsiteScan(
   onComplete: (report: AnalysisReport) => void,
   initialTarget: string | null = null,
 ) {
+  // Read through a ref so a language change does not restart the initial scan.
   const t = useMessages(MESSAGES);
+  const messages = useRef(t);
+  useEffect(() => {
+    messages.current = t;
+  }, [t]);
   const [state, setState] = useState<ScanState>(() =>
     initialTarget
       ? { status: "scanning", target: initialTarget }
@@ -56,7 +61,8 @@ export function useWebsiteScan(
           return setState({
             status: "error",
             target,
-            message: body?.error?.message ?? t.failed(response.status),
+            message:
+              body?.error?.message ?? messages.current.failed(response.status),
           });
         setState({ status: "idle" });
         onComplete(body as AnalysisReport);
@@ -65,11 +71,11 @@ export function useWebsiteScan(
         setState({
           status: "error",
           target,
-          message: t.unreachable,
+          message: messages.current.unreachable,
         });
       }
     },
-    [onComplete, t],
+    [onComplete],
   );
   const cancel = useCallback(() => {
     controller.current?.abort();
