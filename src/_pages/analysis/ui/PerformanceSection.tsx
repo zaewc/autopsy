@@ -1,4 +1,6 @@
+import { useMessages } from "@/shared/lib/i18n";
 import { SectionHeading } from "@/shared/ui/section-heading";
+import { VITAL_RATING_LABELS } from "../config/labels";
 import {
   SAMPLE_REQUESTS,
   SAMPLE_TRANSFER_KB,
@@ -6,6 +8,7 @@ import {
 } from "../config/sampleMetrics";
 import { Waterfall } from "./Waterfall";
 export function PerformanceSection({ network = false }: { network?: boolean }) {
+  const ratings = useMessages(VITAL_RATING_LABELS);
   return (
     <section>
       <SectionHeading title={network ? "Network requests" : "Performance"}>
@@ -27,7 +30,7 @@ export function PerformanceSection({ network = false }: { network?: boolean }) {
             <div className="vital-footer">
               <span>
                 <i />
-                {v.caption}
+                {ratings[v.rating]}
               </span>
               <span>{v.limit}</span>
             </div>
