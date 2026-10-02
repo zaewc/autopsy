@@ -476,6 +476,50 @@ test.describe("Korean locale", () => {
     }
   });
 
+  test("report sections label evidence and checks in Korean", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const sections = page.getByRole("navigation", { name: "리포트 섹션" });
+    await sections.getByRole("button", { name: "기술", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "기술 스택" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: /TypeScript/ }).click();
+    await expect(page.getByText("TypeScript · 샘플 근거")).toBeVisible();
+    await expect(page.locator(".technology-basis").first()).toHaveText("관측");
+    await sections.getByRole("button", { name: /^발견 사항/ }).click();
+    await page
+      .getByRole("button", { name: /JavaScript payload could be smaller/ })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "개선 제안" }),
+    ).toBeVisible();
+    await expect(page.locator(".finding-tag").first()).toHaveText("성능");
+    await page.getByRole("button", { name: "정보", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: /JavaScript payload/ }),
+    ).toHaveCount(0);
+    await sections.getByRole("button", { name: "보안", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "보안 점검" }),
+    ).toBeVisible();
+    await expect(page.locator(".audit-table")).toContainText("검토 필요");
+    await sections
+      .getByRole("button", { name: "아키텍처", exact: true })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "아키텍처 신호" }),
+    ).toBeVisible();
+    await expect(page.getByText(/외부 API는 가설이며/)).toBeVisible();
+    await page.setViewportSize({ width: 320, height: 900 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBeTruthy();
+  });
+
   test("URL entry is in Korean and keeps technical terms", async ({ page }) => {
     await page.goto("/new");
     await expect(
