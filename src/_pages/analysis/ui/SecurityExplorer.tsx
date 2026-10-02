@@ -26,6 +26,17 @@ const CATEGORIES: readonly SecurityCategory[] = [
   "Dependencies",
   "Disclosure",
 ];
+const EVIDENCE_SECTIONS = [
+  "TLS and certificate",
+  "Security headers",
+  "Content Security Policy",
+  "Cookies",
+  "Third-party scripts",
+  "Known vulnerabilities",
+  "security.txt",
+] as const;
+const evidenceId = (title: string) =>
+  `security-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 const DAY = 86_400_000;
 
 function date(value: string | null) {
@@ -39,22 +50,69 @@ function Issues({ security }: { security: SecurityReport }) {
     () => new Set(SEVERITIES),
   );
   const [category, setCategory] = useState<SecurityCategory | "All">("All");
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("severity");
   const [expanded, setExpanded] = useState<string | null>(null);
   const shown = useMemo(
     () =>
-      security.issues.filter(
-        (issue) =>
-          severities.has(issue.severity) &&
-          (category === "All" || issue.category === category),
-      ),
-    [security.issues, severities, category],
+      security.issues
+        .filter(
+          (issue) =>
+            severities.has(issue.severity) &&
+            (category === "All" || issue.category === category) &&
+            [
+              issue.title,
+              issue.evidence,
+              issue.impact,
+              issue.fix,
+              issue.category,
+              ...issue.references.map((reference) => reference.label),
+            ]
+              .join(" ")
+              .toLowerCase()
+              .includes(query.trim().toLowerCase()),
+        )
+        .sort((a, b) =>
+          sort === "title"
+            ? a.title.localeCompare(b.title)
+            : SEVERITIES.indexOf(a.severity) - SEVERITIES.indexOf(b.severity) ||
+              a.title.localeCompare(b.title),
+        ),
+    [security.issues, severities, category, query, sort],
   );
   const count = (severity: SecuritySeverity) =>
     security.issues.filter((issue) => issue.severity === severity).length;
   const categoryCount = (name: SecurityCategory) =>
     security.issues.filter((issue) => issue.category === name).length;
+  const reset = () => {
+    setQuery("");
+    setCategory("All");
+    setSeverities(new Set(SEVERITIES));
+    setSort("severity");
+  };
   return (
     <>
+      <div className="security-search">
+        <label>
+          Search issues
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Title, evidence, package or advisory"
+          />
+        </label>
+        <label className="category-filter">
+          Sort by
+          <select
+            value={sort}
+            onChange={(event) => setSort(event.target.value)}
+          >
+            <option value="severity">Severity: highest first</option>
+            <option value="title">Title: A–Z</option>
+          </select>
+        </label>
+      </div>
       <div className="security-filters">
         <div role="group" aria-label="Severity">
           {SEVERITIES.map((severity) => (
@@ -79,6 +137,7 @@ function Issues({ security }: { security: SecurityReport }) {
         <label className="category-filter">
           Category
           <select
+            aria-label="Category"
             value={category}
             onChange={(event) =>
               setCategory(event.target.value as SecurityCategory | "All")
@@ -92,6 +151,14 @@ function Issues({ security }: { security: SecurityReport }) {
             ))}
           </select>
         </label>
+      </div>
+      <div className="security-result-count">
+        <p role="status">
+          {shown.length} of {security.issues.length} issues
+        </p>
+        <button className="secondary-button" onClick={reset}>
+          Reset filters
+        </button>
       </div>
       <div className="findings-list security-issues">
         {shown.map((issue) => (
@@ -170,13 +237,18 @@ function Detail({
   children: React.ReactNode;
 }) {
   return (
-    <div className="security-detail">
-      <div className="subheading">
+    <section
+      className="security-detail"
+      id={evidenceId(title)}
+      tabIndex={-1}
+      aria-label={title}
+    >
+      <h3 className="subheading">
         {title}
         {caption && <span>{caption}</span>}
-      </div>
+      </h3>
       {children}
-    </div>
+    </section>
   );
 }
 
@@ -224,6 +296,18 @@ export function SecurityExplorer({ security }: { security: SecurityReport }) {
         these are configuration weaknesses and known advisories, not confirmed
         exploits.
       </p>
+      <nav className="security-evidence-nav" aria-label="Security evidence">
+        <span>Inspect evidence</span>
+        {EVIDENCE_SECTIONS.map((title) => (
+          <a
+            key={title}
+            href={`#${evidenceId(title)}`}
+            onClick={() => document.getElementById(evidenceId(title))?.focus()}
+          >
+            {title}
+          </a>
+        ))}
+      </nav>
       <Issues security={security} />
       <div className="security-details">
         <Detail
