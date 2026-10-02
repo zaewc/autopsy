@@ -1,4 +1,4 @@
-import { useMessages, type Localized } from "@/shared/lib/i18n";
+import { useLocale, useMessages, type Localized } from "@/shared/lib/i18n";
 import { SectionHeading } from "@/shared/ui/section-heading";
 import {
   ArchitectureDiagram,
@@ -42,6 +42,7 @@ export function ArchitectureSection({
   details?: boolean;
 }) {
   const t = useMessages(MESSAGES);
+  const locale = useLocale();
   const live = report.mode === "live";
   return (
     <section>
@@ -57,7 +58,7 @@ export function ArchitectureSection({
           </span>
         </div>
       </SectionHeading>
-      <ArchitectureDiagram nodes={architectureNodes(report)} />
+      <ArchitectureDiagram nodes={architectureNodes(report, locale)} />
       {details && (
         <p className="architecture-note">{live ? t.liveNote : t.sampleNote}</p>
       )}

@@ -6,7 +6,7 @@ import {
   type AnalysisReport,
   type AuditArea,
 } from "@/entities/analysis-report";
-import { useMessages, type Localized } from "@/shared/lib/i18n";
+import { useLocale, useMessages, type Localized } from "@/shared/lib/i18n";
 import {
   FINDING_SEVERITY_LABELS,
   SECURITY_SEVERITY_LABELS,
@@ -226,6 +226,7 @@ export function ReportOverview({
   onOpen: (section: ReportSection) => void;
 }) {
   const t = useMessages(MESSAGES);
+  const locale = useLocale();
   const ratings = useMessages(VITAL_RATING_LABELS);
   const severities = useMessages(SECURITY_SEVERITY_LABELS);
   const findingSeverities = useMessages(FINDING_SEVERITY_LABELS);
@@ -234,7 +235,7 @@ export function ReportOverview({
   ).length;
   const inferred = report.technologies.length - observed;
   const speed = performance(report, t, ratings);
-  const path = architectureNodes(report);
+  const path = architectureNodes(report, locale);
   const warnings = report.findings.filter(
     ({ severity }) => severity === "warning",
   ).length;

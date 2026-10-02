@@ -455,6 +455,7 @@ test.describe("Korean locale", () => {
         overview.getByRole("button", { name: new RegExp(`^${section} 열기:`) }),
       ).toBeVisible();
     await expect(overview).toContainText("관측된 기술 5개 · 추론 1개");
+    await expect(overview).toContainText("브라우저 → Cloudflare → Next.js");
     await expect(overview).toContainText("경고 2개 · 정보 1개");
     await expect(overview).toContainText("LCP");
     await expect(overview).toContainText("좋음");
@@ -512,6 +513,8 @@ test.describe("Korean locale", () => {
       page.getByRole("heading", { name: "아키텍처 신호" }),
     ).toBeVisible();
     await expect(page.getByText(/외부 API는 가설이며/)).toBeVisible();
+    await page.getByRole("button", { name: /^브라우저/ }).click();
+    await expect(page.getByRole("status")).toContainText("이 샘플에서 관측");
     await page.setViewportSize({ width: 320, height: 900 });
     expect(
       await page.evaluate(
