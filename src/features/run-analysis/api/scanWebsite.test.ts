@@ -213,6 +213,40 @@ describe("scanWebsite", () => {
     expect(await failure("example.com/file.pdf")).toBe("not-html");
   });
 
+  it("writes Korean notices, header summaries, and errors", async () => {
+    respond({
+      status: 403,
+      headers: {
+        "content-type": "text/html",
+        "set-cookie": "a=1; path=/",
+      },
+    });
+    const report = await scanWebsite("github.com", { locale: "ko" });
+    expect(report.notice).toMatch(
+      /^브라우저 단계를 실행하지 못했습니다: 스캔용 브라우저를 시작하지 못했습니다\./,
+    );
+    expect(report.notice).toContain("HTTP 403로 응답했습니다");
+    expect(report.document?.headers["set-cookie"]).toBe("쿠키 1개, 값 생략");
+    const invalid = await scanWebsite("not a url", { locale: "ko" }).catch(
+      (caught: unknown) => caught as Error,
+    );
+    expect((invalid as Error).message).toBe(
+      "example.com 같은 올바른 웹사이트 URL을 입력하세요.",
+    );
+    fetchPublicDocument.mockImplementation(async () => {
+      throw new PublicFetchError(
+        "connection",
+        "The website could not be reached (ECONNREFUSED).",
+      );
+    });
+    const refused = await scanWebsite("github.com", { locale: "ko" }).catch(
+      (caught: unknown) => caught as Error,
+    );
+    expect((refused as Error).message).toBe(
+      "웹사이트에 연결할 수 없습니다 (ECONNREFUSED).",
+    );
+  });
+
   it("passes fetch failure codes through", async () => {
     fetchPublicDocument.mockImplementation(async () => {
       throw new PublicFetchError("blocked", "10.0.0.1 is not public.");

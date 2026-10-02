@@ -4,6 +4,7 @@ import {
   ScanError,
   type ScanFailure,
 } from "@/features/run-analysis/index.server";
+import { requestLocale } from "@/shared/lib/i18n/index.server";
 
 const STATUS: Readonly<Record<ScanFailure, number>> = {
   "invalid-url": 400,
@@ -21,7 +22,10 @@ export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get("url") ?? "";
   const headers = { "cache-control": "no-store" };
   try {
-    const report = await scanWebsite(url, { signal: request.signal });
+    const report = await scanWebsite(url, {
+      signal: request.signal,
+      locale: await requestLocale(),
+    });
     return NextResponse.json(report, { headers });
   } catch (error) {
     if (!(error instanceof ScanError)) throw error;

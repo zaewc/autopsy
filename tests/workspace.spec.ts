@@ -617,6 +617,20 @@ test.describe("Korean locale", () => {
     }
   });
 
+  test("scan notices and failures come back in Korean", async ({ page }) => {
+    await page.goto(`/?site=${encodeURIComponent(`${FIXTURE}/next`)}`);
+    await expect(page.locator(".report-note")).toContainText(
+      "headless Chromium에서 스크립트를 실행한 상태로",
+      { timeout: 15000 },
+    );
+    await page.goto("/?site=10.0.0.1");
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(
+      "공개 인터넷 주소의 80, 443 포트만 스캔합니다.",
+      { timeout: 15000 },
+    );
+    await expect(page.getByRole("button", { name: "다시 시도" })).toBeVisible();
+  });
+
   test("URL entry is in Korean and keeps technical terms", async ({ page }) => {
     await page.goto("/new");
     await expect(
