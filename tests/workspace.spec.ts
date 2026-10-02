@@ -520,6 +520,45 @@ test.describe("Korean locale", () => {
     ).toBeTruthy();
   });
 
+  test("performance and network views are in Korean", async ({ page }) => {
+    await page.goto("/");
+    const sections = page.getByRole("navigation", { name: "리포트 섹션" });
+    await sections.getByRole("button", { name: "성능", exact: true }).click();
+    await expect(page.getByText("예시 값 · 측정하지 않음")).toBeVisible();
+    await expect(page.getByText("Largest Contentful Paint")).toBeVisible();
+    await page.goto(`/?site=${encodeURIComponent(`${FIXTURE}/moved`)}`);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "127.0.0.1 127.0.0.1 열기" }),
+    ).toBeVisible({ timeout: 15000 });
+    await sections.getByRole("button", { name: "성능", exact: true }).click();
+    await expect(
+      page.getByText("lab 값 · headless Chromium, 데스크톱, throttling 없음"),
+    ).toBeVisible();
+    await expect(page.locator(".requests-panel .subheading")).toContainText(
+      /요청 waterfall\s*요청 \d+개 중 처음 \d+개/,
+    );
+    await expect(page.getByText("HTTP 상태")).toBeVisible();
+    await sections
+      .getByRole("button", { name: "네트워크", exact: true })
+      .click();
+    await expect(page.getByText("리디렉션 1개", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "유형", exact: true }),
+    ).toBeVisible();
+    for (const width of [1440, 320]) {
+      await page.setViewportSize({ width, height: 1000 });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBeTruthy();
+      await page.screenshot({
+        path: `/tmp/autopsy-ko-network-${width}.png`,
+        fullPage: true,
+      });
+    }
+  });
+
   test("URL entry is in Korean and keeps technical terms", async ({ page }) => {
     await page.goto("/new");
     await expect(
