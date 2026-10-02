@@ -156,7 +156,7 @@ export async function scanWebsite(
   if (contentType && !/html/i.test(contentType))
     throw new ScanError("not-html", t.notHtml(contentType.split(";")[0]));
   const signals = { headers: document.headers, html: document.body };
-  const audit = auditDocument(signals);
+  const audit = auditDocument(signals, locale);
   const observed = await observeInBrowser(document.url, signal, t);
   const technologies = detectTechnologies({
     ...signals,

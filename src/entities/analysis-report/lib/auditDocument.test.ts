@@ -88,3 +88,32 @@ describe("auditDocument", () => {
     ).toBe('18 characters: The world\'s "best"');
   });
 });
+
+describe("auditDocument in Korean", () => {
+  it("writes the same checks and findings with Korean text", () => {
+    const input = {
+      headers: { "x-robots-tag": "noindex" },
+      html: '<html><body><img src="a.png"><img src="b.png" alt=""></body></html>',
+    };
+    const english = auditDocument(input);
+    const korean = auditDocument(input, "ko");
+    expect(korean.checks.map(({ area, status }) => [area, status])).toEqual(
+      english.checks.map(({ area, status }) => [area, status]),
+    );
+    expect(korean.findings.map(({ severity, tag }) => [severity, tag])).toEqual(
+      english.findings.map(({ severity, tag }) => [severity, tag]),
+    );
+    expect(korean.checks.map(({ name }) => name)).toContain(
+      "이미지 대체 텍스트",
+    );
+    expect(korean.findings.map(({ title }) => title)).toContain(
+      "이미지 1개에 대체 텍스트가 없습니다",
+    );
+    expect(
+      korean.checks.find(({ name }) => name === "이미지 크기")?.detail,
+    ).toBe("HTML의 이미지 2개 중 2개에 width 또는 height 속성이 없습니다");
+    expect(
+      korean.checks.find(({ name }) => name === "Robots 지시어")?.detail,
+    ).toBe("noindex가 설정됨: noindex");
+  });
+});
