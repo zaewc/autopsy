@@ -559,6 +559,64 @@ test.describe("Korean locale", () => {
     }
   });
 
+  test("security review filters and evidence are in Korean", async ({
+    page,
+  }) => {
+    await page.goto(`/?site=${encodeURIComponent(`${FIXTURE}/next`)}`);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "127.0.0.1 127.0.0.1 열기" }),
+    ).toBeVisible({ timeout: 15000 });
+    await page
+      .getByRole("navigation", { name: "리포트 섹션" })
+      .getByRole("button", { name: "보안", exact: true })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "보안 검토" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^높음/, pressed: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("row", { name: /sid 아니요 아니요 설정 안 됨/ }),
+    ).toBeVisible();
+    const search = page.getByRole("searchbox", { name: "이슈 검색" });
+    await search.fill("no-matching-security-evidence");
+    await expect(
+      page.getByText("필터와 일치하는 이슈가 없습니다."),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "필터 초기화" }).click();
+    await page.getByLabel("분류", { exact: true }).selectOption("Transport");
+    await expect(page.locator(".security-result-count")).toContainText(
+      /이슈 \d+개 중 \d+개/,
+    );
+    await expect(
+      page.locator(".security-issues .finding-tag").first(),
+    ).toHaveText("전송");
+    await page
+      .getByRole("navigation", { name: "보안 근거" })
+      .getByRole("link", { name: "보안 헤더", exact: true })
+      .click();
+    await expect(
+      page.getByRole("region", { name: "보안 헤더", exact: true }),
+    ).toBeFocused();
+    await expect(page).toHaveURL(/#security-security-headers$/);
+    for (const width of [1440, 320]) {
+      await page.setViewportSize({ width, height: 1000 });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBeTruthy();
+      await page.evaluate(() =>
+        window.scrollTo({ top: 0, behavior: "instant" }),
+      );
+      await page.screenshot({
+        path: `/tmp/autopsy-ko-security-${width}.png`,
+        fullPage: true,
+      });
+    }
+  });
+
   test("URL entry is in Korean and keeps technical terms", async ({ page }) => {
     await page.goto("/new");
     await expect(
