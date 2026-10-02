@@ -171,3 +171,46 @@ describe("analyzeSecurity", () => {
     expect(ids({ ...HARDENED, server: "cloudflare" })).toEqual([]);
   });
 });
+
+describe("analyzeSecurity in Korean", () => {
+  it("keeps ids, severities, and references and translates the text", () => {
+    const input = {
+      url: "http://site.test/",
+      headers: {
+        "content-security-policy-report-only":
+          "script-src * 'unsafe-inline' 'unsafe-eval'",
+        "x-xss-protection": "1; mode=block",
+        "referrer-policy": "unsafe-url",
+        "access-control-allow-origin": "*",
+        "access-control-allow-credentials": "true",
+        "x-powered-by": "PHP/8.1",
+      },
+      setCookies: ["sid=secret; SameSite=None", "__Host-a=1; Path=/x"],
+      tls: {
+        ...TLS,
+        protocol: "TLSv1",
+        certificate: { ...TLS.certificate!, validTo: "2026-10-10T00:00:00Z" },
+      },
+      now: NOW,
+    };
+    const english = analyzeSecurity(input).issues;
+    const korean = analyzeSecurity({ ...input, locale: "ko" }).issues;
+    const shape = (issues: typeof english) =>
+      issues.map(({ id, category, severity, references }) => ({
+        id,
+        category,
+        severity,
+        references,
+      }));
+    expect(shape(korean)).toEqual(shape(english));
+    for (const [index, issue] of korean.entries()) {
+      expect(issue.title).not.toBe(english[index].title);
+      expect(issue.impact).not.toBe(english[index].impact);
+      expect(issue.fix).not.toBe(english[index].fix);
+      expect(JSON.stringify(issue)).not.toMatch(/undefined|secret/);
+    }
+    expect(korean.map(({ title }) => title)).toContain(
+      "페이지가 HTTPS 없이 제공됩니다",
+    );
+  });
+});

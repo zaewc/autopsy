@@ -576,6 +576,12 @@ test.describe("Korean locale", () => {
     await expect(
       page.getByRole("button", { name: /^높음/, pressed: true }),
     ).toBeVisible();
+    await page
+      .getByRole("button", { name: /높음\s*페이지가 HTTPS 없이 제공됩니다/ })
+      .click();
+    await expect(
+      page.getByText("최종 URL: http://127.0.0.1:3101/next"),
+    ).toBeVisible();
     await expect(
       page.getByRole("row", { name: /sid 아니요 아니요 설정 안 됨/ }),
     ).toBeVisible();

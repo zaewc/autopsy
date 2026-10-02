@@ -168,6 +168,7 @@ export async function scanWebsite(
     rendered: observed.rendered,
     browser: observed.browser,
     signal,
+    locale,
   });
   return {
     mode: "live",
