@@ -259,7 +259,11 @@ export function AnalysisWorkspace({
                   </>
                 )}
               </div>
-              <ReportTabs active={active} onSelect={setActive} />
+              <ReportTabs
+                active={active}
+                findings={report.findings.length}
+                onSelect={setActive}
+              />
               <div
                 id="report-panel"
                 role="tabpanel"
