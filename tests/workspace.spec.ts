@@ -387,6 +387,18 @@ test("language switch keeps the shown report and remembers the choice", async ({
   await expect(
     page.getByRole("heading", { level: 1, name: "127.0.0.1 Open 127.0.0.1" }),
   ).toBeVisible({ timeout: 15000 });
+  // The tab badge matches the shown report, not the sample's three findings.
+  const findings = await page
+    .locator(".glance-row", { hasText: /^Findings/ })
+    .locator(".glance-summary")
+    .textContent();
+  const [, warnings, info] =
+    findings?.match(/(\d+) warnings? · (\d+) info/) ?? [];
+  await page.setViewportSize({ width: 390, height: 900 });
+  await expect(page.getByRole("tab", { name: /^Findings/ })).toHaveText(
+    `Findings${Number(warnings) + Number(info)}`,
+  );
+  await page.setViewportSize({ width: 1280, height: 720 });
   await page.getByRole("button", { name: "한국어로 보기" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "ko");
   await expect(

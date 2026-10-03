@@ -10,9 +10,12 @@ const MESSAGES: Localized<{ view: string }> = {
 };
 export function ReportTabs({
   active,
+  findings,
   onSelect,
 }: {
   active: ReportSection;
+  /** Number of findings in the shown report. */
+  findings: number;
   onSelect: (name: ReportSection) => void;
 }) {
   const t = useMessages(MESSAGES);
@@ -47,7 +50,7 @@ export function ReportTabs({
           }}
         >
           {labels[name]}
-          {name === "Findings" && <span>3</span>}
+          {name === "Findings" && <span>{findings}</span>}
         </button>
       ))}
     </div>
